@@ -84,12 +84,12 @@ const schedules = [
  ['10:00','참가자 공동 아침 식사'],['14:00','첫인상 선택 및 준비'],['16:00','자유 시간 · 숙소 라운지'],['21:00','첫날의 메시지']
 ];
 const chats = {
- jiwoo:[{from:'them',text:'뭐 해? 오늘은 조금 조용하네\n심심하니까 같이 놀자'}],
- yuryeon:[{from:'them',text:'잘 지냈어?\n요즘 연락도 통 없더니 여기서 보네'}],
- kaede:[{from:'them',text:'뭐 하고 있어요?\n시간 되면 저랑 같이 밥 먹어요\n오랜만에 이야기하고 싶어요'}],
- sohyun:[{from:'them',text:'오랜만이네\n얼굴 보니까 너무 좋다\n자주 봤으면 좋겠어'}],
- xinwei:[{from:'them',text:'{{userName}}~ 나 보고 싶었지?\n나랑 같이 밥 먹을래?'}],
- hayeon:[{from:'them',text:'뭐 해? 나랑 놀자\n요즘 얼굴 보기가 너무 힘든 거 아니야?'}]
+ jiwoo:[{from:'them',text:'뭐 해? 오늘은 조금 조용하네'},{from:'them',text:'심심하니까 같이 놀자'}],
+ yuryeon:[{from:'them',text:'잘 지냈어?'},{from:'them',text:'요즘 연락도 통 없더니 여기서 보네'}],
+ kaede:[{from:'them',text:'뭐 하고 있어요?'},{from:'them',text:'시간 되면 저랑 같이 밥 먹어요'},{from:'them',text:'오랜만에 이야기하고 싶어요'}],
+ sohyun:[{from:'them',text:'오랜만이네'},{from:'them',text:'얼굴 보니까 너무 좋다'},{from:'them',text:'자주 봤으면 좋겠어'}],
+ xinwei:[{from:'them',text:'{{userName}}~ 나 보고 싶었지?'},{from:'them',text:'나랑 같이 밥 먹을래?'}],
+ hayeon:[{from:'them',text:'뭐 해? 나랑 놀자'},{from:'them',text:'요즘 얼굴 보기가 너무 힘든 거 아니야?'}]
 };
 const choices = [
  {text:'나도 너랑 이야기하고 싶었어.',reply:'그렇게 말해줘서 다행이에요. 나중에 둘이 이야기해요.',score:3},
@@ -136,7 +136,7 @@ function ensureGameState(){
  state.letters=state.letters||[]; state.events=state.events||[];
  state.dateHistory=state.dateHistory||[]; state.noticeRead=state.noticeRead||[];
  const oldSeed={jiwoo:['오늘은 조금 늦게까지 깨어 있을 것 같아요.','여기서 다시 보니까 기분이 묘하네요.'],yuryeon:['오늘 같이 밥 먹을래? 할 얘기도 있고.'],kaede:['여기서 보니까 조금 낯설다.'],sohyun:['드디어 다 같이 모였네. 잘 지내보자.'],xinwei:['여기 분위기 생각보다 괜찮은데?'],hayeon:['오늘은 어떤 하루가 될지 궁금하네요.']};
- people.forEach(p=>{if(!Number.isFinite(state.scores[p.id]))state.scores[p.id]=0;if(!Array.isArray(state.messages[p.id]))state.messages[p.id]=(chats[p.id]||[]).map(m=>({...m,text:m.text.replaceAll('{{userName}}',state.name||'')}));else{const msgs=state.messages[p.id],seed=(chats[p.id]||[]).map(m=>({...m,text:m.text.replaceAll('{{userName}}',state.name||'')}));if(msgs.length===1&&seed.length===1&&msgs[0].text===seed[0].text&&msgs[0].from==='me')state.messages[p.id]=seed;else{const legacy=oldSeed[p.id]||[];if(msgs.length===legacy.length&&msgs.every((m,i)=>m.from==='them'&&m.text===legacy[i]))state.messages[p.id]=seed;}}});
+ people.forEach(p=>{if(!Number.isFinite(state.scores[p.id]))state.scores[p.id]=0;const seed=(chats[p.id]||[]).map(m=>({...m,text:m.text.replaceAll('{{userName}}',state.name||'')}));if(!Array.isArray(state.messages[p.id]))state.messages[p.id]=seed;else{const msgs=state.messages[p.id];const joined=seed.map(m=>m.text).join('\\n');if(msgs.length&&msgs[0].text===joined&&(msgs[0].from==='them'||msgs[0].from==='me'))state.messages[p.id]=[...seed,...msgs.slice(1)];else if(msgs.length===1&&seed.length===1&&msgs[0].text===seed[0].text&&msgs[0].from==='me')state.messages[p.id]=seed;else{const legacy=oldSeed[p.id]||[];if(msgs.length===legacy.length&&msgs.every((m,i)=>m.from==='them'&&m.text===legacy[i]))state.messages[p.id]=seed;}}});
 }
 function relScore(id){ensureGameState();return state.scores[id]||0}
 function changeRel(id,n,reason){ensureGameState();state.scores[id]=Math.max(0,Math.min(100,(state.scores[id]||0)+n));state.events.push({day:state.day,text:reason||`${person(id).name}와의 관계가 조금 달라졌다.`});save()}
