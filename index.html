@@ -38,6 +38,129 @@ body{padding:0}.app-shell{width:100%;max-width:480px;min-height:100dvh;margin:au
 @media(min-width:500px){body{padding:20px 0}.app-shell{min-height:calc(100dvh - 40px);border-radius:25px}.bottom-nav{bottom:20px;border-radius:0 0 25px 25px}.onboarding{min-height:calc(100dvh - 74px)}}
 
    .chat-day-divider{display:flex;align-items:center;gap:10px;margin:18px 0;color:#9b8d7e;font:600 9px 'DM Sans';letter-spacing:1.4px}.chat-day-divider:before,.chat-day-divider:after{content:"";height:1px;background:#ded4c7;flex:1}
+
+
+/* OUR SEASON · MODERN CREAM DESIGN SYSTEM v2 */
+:root{
+ --paper:#F7F4ED;--paper2:#FFFEFA;--ink:#39332F;--muted:#958A7F;
+ --red:#A66F59;--red2:#B9856F;--blue:#8296A0;--green:#8D9A86;
+ --yellow:#C5AD7B;--purple:#9B8D9E;--line:#E7E0D6;
+ --cream:#F7F4ED;--white:#FFFEFA;--brown:#39332F;--clay:#A66F59;
+}
+html,body{background:#EAE5DC;color:var(--ink);font-family:'Noto Sans KR',sans-serif}
+body{padding:0}
+.app-shell{max-width:520px;background:var(--paper2);box-shadow:0 18px 70px #45392b12}
+#mainApp{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+.status{height:34px;padding:8px 22px 0;background:var(--paper2);color:#8C8177;font:600 11px 'DM Sans';letter-spacing:.2px}
+.onboarding{background:var(--paper);background-image:none;padding:38px 25px 30px}
+.eyebrow,.kicker,.smallcaps{color:var(--clay);letter-spacing:1.8px}
+h1{color:var(--brown);font-family:'Playfair Display',serif;letter-spacing:-2.5px}
+.intro{color:#71665D}
+.route-art{max-width:360px;opacity:.86}
+.form-card{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 28px #493b2b08}
+.form-card label{color:var(--muted)}
+.form-card input{border-bottom-color:var(--line);color:var(--brown)}
+.primary{background:var(--clay);color:#fff;border:1px solid var(--clay);border-radius:11px;padding:13px 18px;font:600 13px 'Noto Sans KR';box-shadow:none;transition:background .18s,border-color .18s,transform .18s}
+.primary:active{transform:scale(.985)}
+.primary:disabled{background:#C8BDB2;border-color:#C8BDB2;opacity:1!important;box-shadow:none!important}
+.secondary{background:var(--white);color:var(--brown);border:1px solid var(--line);border-radius:11px;padding:12px 16px}
+.screen{padding:22px 20px 32px;min-height:calc(100dvh - 122px);background:var(--paper2);background-image:none}
+.topline{margin-bottom:9px;gap:12px}
+.brand{font:600 18px 'Playfair Display',serif;color:var(--brown);letter-spacing:.2px}
+h2{font:500 34px/1.08 'Playfair Display',serif;color:var(--brown);letter-spacing:-.7px;margin:5px 0 13px}
+h2.serif{font-size:32px}
+.subcopy{font-size:12px;line-height:1.8;color:#81766C;margin:2px 0 19px}
+.section-title{margin:25px 0 12px;font:700 10px 'DM Sans';letter-spacing:1.55px;color:#655B52}
+.section-title span:last-child{color:var(--clay)}
+.hero{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#F1ECE3;margin:17px 0 22px;box-shadow:0 5px 18px #46392a08}
+.hero-image{height:166px;background:linear-gradient(135deg,#D9D1C4 0%,#ECE5D9 52%,#D8CBBE 100%);position:relative;overflow:hidden}
+.hero-image:before{inset:0;background:linear-gradient(115deg,transparent 0 34%,#ffffff50 34.5% 35%,transparent 35.5% 100%),radial-gradient(ellipse at 75% 15%,#ffffff65,transparent 40%),linear-gradient(0deg,#6C5A4A12,transparent 60%);}
+.hero-image:after{content:'OUR SEASON';position:absolute;left:18px;bottom:13px;color:#fffdf8;font:500 11px 'DM Sans';letter-spacing:3px;text-shadow:0 1px 7px #493b2b66}
+.hero-image svg{width:100%;height:100%;opacity:.78;transform:scale(1.05)}
+.hero-body{padding:17px 17px 18px}
+.day-pill{display:inline-block;background:var(--clay);color:white;border-radius:5px;padding:5px 9px;font:700 9px 'DM Sans';letter-spacing:1.15px}
+.hero h3{font:600 22px 'Noto Sans KR';letter-spacing:-.5px;margin:11px 0 5px;color:var(--brown)}
+.hero p{font-size:12px;color:#81766C;line-height:1.8;margin:0}
+.quest-progress{margin:0 0 11px;font-size:10px;color:var(--muted);gap:10px}
+.quest-progress b{color:var(--clay);font:700 11px 'DM Sans'}
+.quest-list{gap:9px}
+.quest-card{gap:12px;padding:14px 13px;border:1px solid var(--line);border-radius:13px;background:var(--white);color:var(--brown);transition:border-color .18s,background .18s}
+.quest-card:active{background:#F5F0E8}
+.quest-card.done{background:#F4F0E8;border-color:#D8CFC2}
+.quest-check{width:23px;height:23px;border:1px solid #CFC4B7;color:#fff;font:600 11px 'DM Sans'}
+.quest-card.done .quest-check{background:var(--clay);border-color:var(--clay)}
+.quest-copy b{font-size:12px;font-weight:600;color:var(--brown)}
+.quest-copy small{font-size:10px;color:var(--muted);line-height:1.55}
+.quest-state{font:700 8px 'DM Sans';letter-spacing:.7px;color:var(--clay)}
+.notice{padding:13px 14px;border-left:2px solid var(--clay);background:#F4F0E9;color:#75695F;border-radius:0 9px 9px 0}
+.home-notice{margin:21px 0 0}
+.home-notice-head{color:#655B52}
+.home-notice-head .status{color:var(--clay)}
+.home-notice-card{border:1px solid var(--line);border-radius:13px;background:#F5F1EA;color:#75695F;padding:15px 16px;font-size:12px}
+.day-control{margin-top:20px;padding:15px 0 0;border-top:1px solid var(--line)}
+.day-control b{color:var(--brown);font:600 12px 'DM Sans';letter-spacing:.5px}
+.day-control .primary{min-width:120px}
+.bottom-nav{width:min(100%,520px);height:calc(76px + env(safe-area-inset-bottom));padding:9px 8px calc(9px + env(safe-area-inset-bottom));background:#FFFEFAF2;backdrop-filter:blur(18px);border-top:1px solid var(--line);box-shadow:0 -5px 20px #493b2b06}
+.bottom-nav button{color:#9B9085;font:700 8px 'DM Sans';letter-spacing:.7px;gap:4px;min-width:52px}
+.bottom-nav button .nav-icon{width:21px;height:21px}
+.bottom-nav button.active{color:var(--clay)}
+.cast-grid{gap:12px}
+.cast-card{border:1px solid var(--line);border-radius:15px;background:var(--white);box-shadow:none;transition:transform .18s,border-color .18s}
+.cast-card:active{transform:scale(.985)}
+.cast-photo{height:190px;background:#EEE8DE}
+.cast-info{padding:12px 12px 14px}
+.cast-name{color:var(--brown);font-size:13px;font-weight:600}
+.cast-meta{color:var(--muted);font-size:10px;margin-top:4px}
+.chat-list{border-top:1px solid var(--line)}
+.chat-person{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:14px 3px;color:var(--brown);gap:12px}
+.chat-person:active{background:#F7F3EC}
+.chat-main b{font-size:13px;color:var(--brown)}
+.chat-main p{font-size:10px;color:var(--muted)}
+.chat-time{font:10px 'DM Sans';color:#A99D91}
+.avatar{border-radius:50%;overflow:hidden;background:#E6DED2}
+.chat-avatar,.date-avatar{width:44px;height:44px}
+.chat-head{border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:12px}
+.chat-head b{font-size:14px;color:var(--brown)}
+.chat-messages{padding:8px 0 18px;gap:10px}
+.bubble{max-width:82%;border-radius:15px;padding:11px 13px;font-size:12px;line-height:1.7;box-shadow:none}
+.bubble.theirs{background:#F0ECE5;color:var(--brown);border-bottom-left-radius:5px}
+.bubble.mine{background:#A66F59;color:#fff;border-bottom-right-radius:5px}
+.choice-list{gap:8px}
+.choice{border:1px solid var(--line)!important;border-radius:12px!important;background:var(--white)!important;color:var(--brown)!important;padding:13px 14px!important;font-size:12px!important;line-height:1.65}
+.choice:active{border-color:var(--clay)!important;background:#F7F1EA!important}
+.ticket{background:#F2EDE4;border:1px solid #E4DACE;border-radius:17px;padding:19px;box-shadow:none}
+.ticket-top{font:700 9px 'DM Sans';letter-spacing:1.3px;color:var(--clay)}
+.ticket h3{color:var(--brown);font:500 28px 'Playfair Display',serif}
+.ticket p,.ticket-data{color:#81766C}
+.letter{background:#F3EEE5;border:1px solid #E5DCCE;border-radius:16px;padding:24px 19px;box-shadow:none}
+.letter h3{color:var(--brown)}
+.menu-list{border-top:1px solid var(--line)}
+.menu-row{border-bottom:1px solid var(--line);background:transparent;color:var(--brown);padding:16px 4px}
+.menu-row:active{background:#F7F3EC}
+.back{color:var(--clay);font-size:11px}
+.profile-cover{border-radius:18px;overflow:hidden;background:#EEE8DE}
+.profile-name{margin-top:15px}
+.info-list{border-top:1px solid var(--line)}
+.info-row{border-bottom:1px solid var(--line);padding:13px 2px;color:#62584F;font-size:12px;line-height:1.7}
+.map-card{background:#F4F0E9;border:1px solid var(--line);border-radius:16px;padding:14px}
+.modal-backdrop{background:#2E292480;backdrop-filter:blur(4px)}
+.modal,.game-modal{background:var(--paper2);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px #241b1426}
+.toast{background:#39332F;color:#fff;border-radius:10px;box-shadow:0 8px 24px #241b1420}
+@media(min-width:700px){
+ body{padding:24px 0}
+ .app-shell{border-radius:24px;min-height:calc(100dvh - 48px);overflow:hidden}
+ .screen{padding:27px 25px 36px}
+ .hero-image{height:190px}
+ .cast-photo{height:210px}
+ .bottom-nav{border-radius:0 0 24px 24px}
+}
+@media(max-width:360px){
+ .screen{padding-left:16px;padding-right:16px}
+ .hero-image{height:145px}
+ .cast-photo{height:160px}
+ .bottom-nav button{min-width:45px;font-size:7px}
+}
+
 </style>
 </head>
 <body>
@@ -311,7 +434,7 @@ const dateFollowupMessages={
 };
 function finishDate(id,choice){let p=person(id);let lines=dateFollowupMessages[id]||[];let text=(lines[choice]||'').replaceAll('{{userName}}',state.name||'');state.dateHistory.push({day:state.day,id,choice});state.messages[id].push({from:'them',text,day:state.day,dateFollowup:state.day>=3,dateReplied:false});changeRel(id,[5,4,3][choice],`${p.name}와 DAY ${state.day} 데이트를 했다.`);state.dateChoice=null;markQuest('date');closeGameModal();notify(`${p.name}에게서 메시지가 도착했습니다.`,id);render()}
 
-function openLetter(i=0){ensureGameState();if(!state.letters.length){toast('아직 도착한 편지가 없습니다.');return}let l=state.letters[i]||state.letters[0];l.opened=true;save();let who=person(l.possible);gameModal(`<div class="smallcaps">DAY ${l.day} · ANONYMOUS LETTER</div><h2 style="font-family:Georgia,serif;font-size:28px">당신에게 도착한 편지</h2><div style="background:#f3e9ce;padding:22px;border-radius:12px;line-height:1.9;margin:18px 0">${l.text}</div><p>보낸 사람: 익명${who?' · 지금까지의 관계를 돌아보면 '+who.name+'일 가능성이 있습니다.':''}</p><button class="primary wide" onclick="closeGameModal()">닫기</button>`)}
+function openLetter(i=0){ensureGameState();if(!state.letters.length){toast('아직 도착한 편지가 없습니다.');return}let l=state.letters[i]||state.letters[0];l.opened=true;save();let who=person(l.possible);gameModal(`<div class="letter-modal" style="padding:2px 1px 0"><div class="smallcaps" style="font-size:10px;letter-spacing:2px;margin-bottom:10px">DAY ${l.day} · ANONYMOUS LETTER</div><h2 style="font-family:'Noto Sans KR',sans-serif;font-size:25px;line-height:1.35;font-weight:600;letter-spacing:-1px;margin:0 0 20px">당신에게 도착한 편지</h2><div style="background:#f1e8d0;padding:20px 19px;border-radius:16px;line-height:1.9;margin:0 0 22px;font-size:16px;color:#393027;white-space:pre-wrap;overflow-wrap:anywhere">${l.text}</div><div style="padding:0 1px 18px;border-bottom:1px solid #e5ddd1;margin-bottom:18px"><div style="font:700 9px 'DM Sans';letter-spacing:1.7px;color:#9a8c7d;margin-bottom:8px">SENDER CLUE</div><div style="font-size:14px;font-weight:600;margin-bottom:5px">누가 보낸 편지일까요?</div><div style="font-size:12px;line-height:1.7;color:#81756b">${who?'지금까지의 관계를 돌아보면 '+who.name+'이(가) 떠오릅니다.':'아직 보낸 사람을 추측할 단서가 충분하지 않습니다.'}</div></div><button class="secondary wide" style="border:1px solid #d8cfc1;background:#eee8df;color:#51463e;border-radius:28px;padding:13px 18px;font:600 13px 'Noto Sans KR';box-shadow:none;margin-top:0" onclick="closeGameModal()">편지 확인하기</button></div>`);let panel=document.getElementById('gameModalPanel');if(panel){panel.style.width='min(100%,390px)';panel.style.maxHeight='76vh';panel.style.padding='21px 22px 20px';panel.style.borderRadius='22px';panel.style.overflowY='auto'}}
 function showFinal(){ensureGameState();if(state.day<10){toast('최종 선택은 DAY 10에 진행할 수 있습니다.');return}gameModal(`<div class="smallcaps">DAY 10 · FINAL CHOICE</div><h2 style="font-family:Georgia,serif;font-size:30px">마지막 선택</h2><p>열흘 동안의 시간을 돌아보고 마음이 향하는 한 사람을 선택하세요. 선택은 되돌릴 수 없습니다.</p>${people.map(p=>`<button class="choice" style="display:block;width:100%;margin:8px 0" onclick="finalize('${p.id}')">${p.name}</button>`).join('')}<button class="secondary" style="width:100%" onclick="closeGameModal()">조금 더 생각하기</button>`)}
 function finalize(id){state.finalChoice=id;let mutual=relScore(id)>=20;logEvent(`${person(id).name}을(를) 최종 선택했다.`);save();let p=person(id);gameModal(`<div class="smallcaps">OUR SEASON · FINAL</div><h2 style="font-family:Georgia,serif;font-size:30px">당신의 최종 선택</h2><div style="text-align:center;margin:18px"><img src="${p.photo}" style="width:150px;height:190px;object-fit:cover;border-radius:14px"><h2>${p.name}</h2><p>${mutual?'서로의 마음이 같은 방향을 향했습니다.':'당신은 '+p.name+'을(를) 선택했습니다. 상대의 마음은 아직 같지 않을 수 있습니다.'}</p></div><button class="primary wide" onclick="closeGameModal();currentTab='my';render()">나의 기록 보기</button>`)}
 function resetGame(){gameModal('<h2 style="font-family:Georgia,serif">처음부터 다시 시작할까요?</h2><p>참가 정보와 모든 진행 기록이 이 기기에서 삭제됩니다.</p><button class="primary wide" onclick="localStorage.removeItem(\'ourSeasonState\');location.reload()">기록 삭제하고 다시 시작</button><button class="secondary wide" style="margin-top:8px" onclick="closeGameModal()">취소</button>')}
