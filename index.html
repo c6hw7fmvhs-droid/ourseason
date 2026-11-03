@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f1eadf">
+  <meta name="theme-color" content="#F3F7FA">
   <title>OUR SEASON</title>
   <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&display=swap');
@@ -161,11 +161,75 @@ h2.serif{font-size:32px}
  .bottom-nav button{min-width:45px;font-size:7px}
 }
 
+
+/* OUR SEASON · COOL BLUE EDITORIAL REDESIGN */
+:root{--paper:#F3F7FA;--paper2:#FFFFFF;--ink:#202B35;--muted:#788895;--red:#587F9D;--red2:#759BB7;--blue:#789BB4;--green:#8AA69C;--yellow:#C5B58D;--purple:#9A9DB8;--line:#DCE6ED;--clay:#587F9D}
+html,body{background:#EAF0F4;color:var(--ink);font-family:'SUIT','Pretendard','Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif}
+.app-shell{max-width:520px;background:#fff;box-shadow:0 0 44px #233c5010}
+#mainApp{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+.status{display:none!important}
+.onboarding{background:#F3F7FA!important;background-image:none!important}
+.eyebrow,.kicker,.smallcaps{font-family:'Manrope','SUIT','Pretendard',sans-serif;color:#6486A0;letter-spacing:2px}
+h1{font-family:'Manrope','SUIT','Pretendard',sans-serif;color:#527B99;font-weight:700;letter-spacing:-3px}
+.intro,.subcopy{color:#71818E}
+.form-card,.info-list,.chat-list,.menu-list{background:#fff;border-color:var(--line);box-shadow:0 5px 22px #314d6208}
+.form-card{border-radius:20px;padding:20px}
+.form-card label,.section-title,.home-notice-head{font-family:'Manrope','SUIT','Pretendard',sans-serif;color:#718493}
+.form-card input{font-family:'SUIT','Pretendard','Noto Sans KR',sans-serif;border-color:#DCE6ED}
+.primary{background:#587F9D;box-shadow:0 5px 14px #587f9d26}
+.screen{background:#fff;background-image:none!important;padding:25px 21px 32px}
+.brand{font-family:'Manrope','SUIT','Pretendard',sans-serif;font-weight:750;letter-spacing:-.8px;color:#314B60}
+h2{font-family:'SUIT','Pretendard','Noto Sans KR',sans-serif;font-weight:750;letter-spacing:-1.5px;color:#202B35}
+.hero{border:1px solid #DCE6ED;border-radius:20px;background:#F3F7FA;box-shadow:0 8px 24px #2e526c0a}
+.hero-image{background:linear-gradient(135deg,#DCEAF2,#F1F6F9)}
+.hero-image:before{background:linear-gradient(120deg,transparent 25%,#ffffff55 25.5%,transparent 26%),linear-gradient(135deg,#d9e8f1aa,#f5f8fa55)}
+.day-pill{background:#587F9D}
+.hero h3{font-family:'SUIT','Pretendard','Noto Sans KR',sans-serif;font-weight:750;letter-spacing:-.7px}
+.hero p,.quest-copy small{color:#71818E}
+.quest-card{background:#fff;border-color:#DCE6ED;border-radius:15px;box-shadow:0 3px 12px #314d6207}
+.quest-card.done{background:#EFF5F8;border-color:#C8D9E4}
+.quest-check{border-color:#A9BBC8}
+.quest-card.done .quest-check{background:#587F9D;border-color:#587F9D}
+.quest-state,.quest-progress b,.section-title span:last-child{color:#587F9D}
+.notice{background:#F0F5F8;border-left-color:#789BB4;color:#5D7180}
+.home-notice-card,.home-notice-card.completed{background:#F1F6F9;color:#536B7B}
+.home-notice-card .notice-action{color:#587F9D}
+.bottom-nav{width:min(100%,520px);height:calc(82px + env(safe-area-inset-bottom));padding:11px 9px calc(10px + env(safe-area-inset-bottom));background:#FFFFFFF2;backdrop-filter:blur(18px);border-top:1px solid #E1E9EF;box-shadow:0 -7px 24px #314d6209;display:flex;justify-content:space-around;align-items:center;gap:0}
+.bottom-nav button{flex:1;min-width:0;height:58px;padding:5px 0 3px;color:#8A9AA6;font:500 11px 'Manrope','SUIT','Pretendard',sans-serif;letter-spacing:.35px;gap:6px;justify-content:center}
+.bottom-nav button .nav-icon{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.bottom-nav button.active{color:#426F91;font-weight:700}
+.bottom-nav button:active{opacity:.65}
+.cast-card{background:#fff;border-color:#DFE8EE;box-shadow:0 3px 14px #314d6209;border-radius:17px}
+.cast-info{padding:13px}
+.cast-name{font-weight:750}
+.profile-cover{border-radius:18px}
+.profile-quote{font-family:'SUIT','Pretendard',sans-serif;color:#587F9D;font-style:normal;font-weight:600}
+.info-row{border-bottom:1px solid #E7EEF2}
+.chat-person{border-bottom-color:#E7EEF2}
+.bubble{background:#EDF3F7;color:#344957;border-radius:16px}
+.bubble.mine{background:#587F9D;color:#fff}
+.choice{border-color:#A9C1D2;color:#476F8D;background:#F8FBFD;border-radius:13px}
+.ticket{background:#F0F6FA;border:1px solid #C9DCE8;border-radius:14px;box-shadow:none}
+.ticket:before,.ticket:after{background:#fff}
+.ticket-top{color:#587F9D;border-color:#C9DCE8}
+.ticket h3{font-family:'Manrope','SUIT',sans-serif;color:#365B76}
+.secondary{border-color:#A9C1D2;color:#587F9D;font-family:'SUIT','Pretendard',sans-serif}
+.map-card{background:#F5F8FA;border-color:#DCE6ED;border-radius:18px}
+.letter{background:#F5F8FA;border-color:#DCE6ED;border-radius:16px;box-shadow:none}
+.letter:before{background:#E5EFF5}
+.letter h3{font-family:'SUIT','Pretendard',sans-serif;color:#365B76}
+.menu-row{border-bottom-color:#E7EEF2}
+.menu-row span{color:#587F9D}
+.day-control{background:#F2F6F9;border-color:#DCE6ED}
+.day-control b{color:#587F9D}
+.toast{background:#263B4B}
+@media(min-width:500px){body{padding:20px 0}.app-shell{border-radius:25px}.bottom-nav{bottom:20px;border-radius:0 0 25px 25px}}
+@media(max-width:360px){.bottom-nav button{font-size:10px}.bottom-nav button .nav-icon{width:25px;height:25px}}
+
 </style>
 </head>
 <body>
   <div class="app-shell">
-    <header class="status"><span>9:41</span></header>
     <main id="app">
       <section id="onboarding" class="onboarding hidden">
         <div class="eyebrow">A REALITY LOVE PROGRAM</div>
@@ -183,12 +247,12 @@ h2.serif{font-size:32px}
       </section>
       <section id="mainApp" class="hidden">
         <div id="screen"></div>
-        <nav class="bottom-nav">
-          <button data-tab="home" class="active"><svg class="nav-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 29.5 29.1 7.8a4.5 4.5 0 0 1 5.8 0L59 29.5a4.2 4.2 0 0 1-2.8 7.3h-3.1v19.1a5 5 0 0 1-5 5H36.8V42.5a4.8 4.8 0 0 0-9.6 0v18.4H16a5 5 0 0 1-5-5V36.8H7.8a4.2 4.2 0 0 1-2.8-7.3Z"/></svg>HOME</button>
-          <button data-tab="cast"><svg class="nav-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="17.5" r="12.5"/><path d="M8.5 57.5c0-14.1 10.5-24 23.5-24s23.5 9.9 23.5 24v2H8.5z"/></svg>CAST</button>
-          <button data-tab="chat"><svg class="nav-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5C15.7 5 3 15.4 3 29s12.7 24 29 24c3.8 0 7.5-.6 10.8-1.7L57 60l-5.4-15.2C59 40.4 61 35 61 29 61 15.4 48.3 5 32 5Z"/><circle cx="20" cy="29" r="3.8" fill="#faf7f0"/><circle cx="32" cy="29" r="3.8" fill="#faf7f0"/><circle cx="44" cy="29" r="3.8" fill="#faf7f0"/></svg>CHAT</button>
-          <button data-tab="date"><svg class="nav-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M10 7h44a6 6 0 0 1 6 6v38L32 61 4 51V13a6 6 0 0 1 6-6Zm0 7v34l22 8 22-8V14H10Z"/><path d="M32 43 17.8 29.5c-7.4-7 3.2-18.1 10.7-10.7L32 22.3l3.5-3.5c7.5-7.4 18.1 3.7 10.7 10.7L32 43Z"/></svg>DATE</button>
-          <button data-tab="my"><svg class="nav-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M5 17a5 5 0 0 1 5-5h16l6 6h22a5 5 0 0 1 5 5v29a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5V17Z"/><path d="M5 25h54l-7 25a5 5 0 0 1-4.8 3.7H10.5A5 5 0 0 1 5.7 50L5 25Z"/></svg>MY</button>
+        <nav class="bottom-nav" aria-label="주요 메뉴">
+          <button data-tab="home" class="active"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg><span>HOME</span></button>
+          <button data-tab="chat"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-4.2A8.5 8.5 0 1 1 20.5 11.5Z"/></svg><span>CHAT</span></button>
+          <button data-tab="date"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/><path d="m12 16 1.4 1.3L16 15"/></svg><span>DATE</span></button>
+          <button data-tab="letter"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3.5 6 8.5 7 8.5-7"/></svg><span>LETTER</span></button>
+          <button data-tab="cast"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 5a3.5 3.5 0 0 1 0 7M17 14a5.5 5.5 0 0 1 4.5 5.5"/></svg><span>CAST</span></button>
         </nav>
       </section>
     </main>
@@ -309,8 +373,8 @@ function save(){localStorage.setItem('ourSeasonState',JSON.stringify(state))}
 function person(id){return people.find(p=>p.id===id)}
 function toast(msg,onClick=null){const t=$('#toast')||(()=>{let e=document.createElement('div');e.id='toast';e.className='toast';document.body.append(e);return e})();t.textContent=msg;t.onclick=null;t.style.cursor=onClick?'pointer':'';t.setAttribute('role',onClick?'button':'status');if(onClick)t.onclick=()=>{t.classList.remove('show');onClick()};t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3500)}
 function start(){const name=$('#userName').value.trim(),age=Number($('#userAge').value);if(!name||age<18||age>99){toast('이름과 만 18세 이상의 나이를 입력해 주세요.');return}state={name,age,day:1,firstImpressions:[],messages:{},scores:{},letters:[],dateChoice:null,events:[],questActions:{day:1,completed:[]}};people.forEach(p=>{state.messages[p.id]=(chats[p.id]||[]).map(m=>({...m,text:m.text.replaceAll('{{userName}}',name)}));state.scores[p.id]=0});save();$('#onboarding').classList.add('hidden');$('#mainApp').classList.remove('hidden');render()}
-function init(){if(state){$('#onboarding').classList.add('hidden');$('#mainApp').classList.remove('hidden');render()}else{$('#onboarding').classList.remove('hidden');$('#mainApp').classList.add('hidden')}$('#enterBtn').addEventListener('click',start);document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{currentTab=b.dataset.tab;subpage=null;selectedPerson=null;activeChat=null;render();}))}
-function nav(){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===currentTab))}
+function init(){if(state){$('#onboarding').classList.add('hidden');$('#mainApp').classList.remove('hidden');render()}else{$('#onboarding').classList.remove('hidden');$('#mainApp').classList.add('hidden')}$('#enterBtn').addEventListener('click',start);document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{const tab=b.dataset.tab;currentTab=tab==='letter'?'my':tab;subpage=tab==='letter'?'letters':null;selectedPerson=null;activeChat=null;render();}))}
+function nav(){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===(subpage==='letters'?'letter':currentTab)))}
 function header(kicker,title,right=''){return `<div class="topline"><div class="smallcaps">${kicker}</div><div class="brand">OUR SEASON</div></div><div class="topline"><h2>${title}</h2><span class="muted" style="font:12px 'DM Sans'">${right}</span></div>`}
 function routeSvg(){return `<svg viewBox="0 0 340 150" aria-hidden="true"><path d="M-10 30H70L110 65H190L235 25H350" fill="none" stroke="#477d91" stroke-width="4"/><path d="M-5 120H65L110 90H190L235 125H350" fill="none" stroke="#729579" stroke-width="4"/><path d="M55 -10L75 45L145 78L205 40L275 100L290 160" fill="none" stroke="#b74743" stroke-width="8"/><path d="M340 70H260L225 95H145L95 145H-5" fill="none" stroke="#d2b84c" stroke-width="3"/><g fill="#f5f0e7" stroke="#74695e" stroke-width="2"><circle cx="70" cy="30" r="5"/><circle cx="110" cy="65" r="5"/><circle cx="190" cy="65" r="5"/><circle cx="65" cy="120" r="5"/><circle cx="110" cy="90" r="5"/><circle cx="190" cy="90" r="5"/><circle cx="145" cy="78" r="6"/><circle cx="205" cy="40" r="5"/><circle cx="275" cy="100" r="5"/></g></svg>`}
 
