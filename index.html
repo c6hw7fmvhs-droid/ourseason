@@ -537,10 +537,105 @@ function hasRepliedToParticipant(id){if(state.day>=3)return !pendingDateMessage(
 function canReplyToParticipant(id){if(state.day===1)return true;if(state.day>=3)return !!pendingDateMessage(id);return (state.messages[id]||[]).some(m=>m.from==='them'&&m.day===state.day)&&!hasRepliedToParticipant(id)}
 function chatRoom(){let p=person(activeChat),msgs=state.messages[activeChat]||[],alreadyReplied=hasRepliedToParticipant(activeChat),replyOpen=canReplyToParticipant(activeChat);return `<div class="screen chat-screen"><div class="chat-head"><button class="back" onclick="activeChat=null;render()">←</button><div class="avatar chat-avatar"><img src="${p.photo}" alt="${p.name}"></div><b>${p.name}</b></div><div class="chat-messages">${msgs.map((m,i)=>`${m.day===2&&m.from==='them'&&(i===0||msgs[i-1].day!==2)?`<div class="chat-day-divider"><span>DAY 02</span></div>`:''}<div class="bubble ${m.from==='me'?'mine':'theirs'} ${m.secret?'secret':''}">${m.secret?'<small>SECRET MESSAGE</small>':''}${m.text}</div>`).join('')}</div><div class="smallcaps">REPLY</div>${alreadyReplied?`<p class="subcopy" style="text-align:center;margin:12px 0">오늘은 이미 답장을 보냈습니다. 새로운 메시지가 도착하면 다시 답장할 수 있습니다.</p>`:replyOpen?`<div class="choice-list">${currentChoices().map((c,i)=>`<button class="choice" onclick="reply(${i})">${c.text}</button>`).join('')}</div>`:`<p class="subcopy" style="text-align:center;margin:12px 0">참가자에게서 먼저 메시지가 도착하면 답장을 보낼 수 있습니다.</p>`}</div>`}
 function reply(i){if(!activeChat||!canReplyToParticipant(activeChat)){toast(state.day===1?'이미 답장을 보냈습니다.':'답장할 수 있는 새 메시지가 없습니다.');return}const isDateReply=state.day>=3&&!!pendingDateMessage(activeChat);const choices=isDateReply?(dateReplyChoicesByPerson[activeChat]||[]):(state.day===2?dayTwoChoicesByPerson[activeChat]||[]:choicesByPerson[activeChat]||[]);if(!Number.isInteger(i)||i<0||i>=choices.length)return;const responseSet=isDateReply?dateReplyResponsesByPerson:(state.day===2?dayTwoRepliesByPerson:participantReplies);let c={text:choices[i]},response=((responseSet[activeChat]||[])[i]||'응, 나도 그렇게 생각해. 다음에 또 이야기하자.').replaceAll('{{userName}}',state.name||'');state.messages[activeChat]=state.messages[activeChat]||[];if(isDateReply){const incoming=pendingDateMessage(activeChat);if(incoming)incoming.dateReplied=true;}state.messages[activeChat].push({from:'me',text:c.text,day:state.day},{from:'them',text:response,day:state.day});const affection=(affectionByPerson[activeChat]||[1,1,1])[i]||0;state.scores[activeChat]=(state.scores[activeChat]||0)+affection;ensureGameState();deliverSecretLetters(activeChat);markQuest('reply');if(state.day>=2){if(!state.noticeRead.includes(state.day))state.noticeRead.push(state.day)}save();render()}
-function date(){return `<div class="screen">${header('A MOMENT TOGETHER','DATE','DAY '+String(state.day).padStart(2,'0'))}<p class="subcopy">${state.day<2?'데이트는 DAY 02부터 신청할 수 있습니다.': '오늘 함께 시간을 보내고 싶은 참가자를 선택해 데이트 초대장을 확인하세요.'}</p><div class="ticket"><div class="ticket-top"><span>DATE TICKET · OUR SEASON</span><span>DAY ${String(state.day).padStart(2,'0')}</span></div><h3>${state.dateChoice?person(state.dateChoice).name:'TO SOMEONE'}</h3><p>오늘의 목적지는 아직 정해지지 않았습니다.</p><div class="ticket-data">DATE INFO<br>▦　DAY ${String(state.day).padStart(2,'0')}<br>⌖　한강공원<br>◷　16:00</div></div><div class="section-title"><span>CHOOSE YOUR DATE</span><span>6 HOUSEMATES</span></div><div class="chat-list date-list">${people.map(p=>`<button class="chat-person" onclick="chooseDate('${p.id}')"><div class="avatar date-avatar"><img src="${p.photo}" alt="${p.name} 프로필 사진"></div><div class="chat-main"><b>${p.name}</b></div><span>→</span></button>`).join('')}</div>${state.dateChoice?`<div class="button-row" style="margin-top:13px"><button class="primary" onclick="startDate()">초대하기</button><button class="secondary" onclick="state.dateChoice=null;save();render()">취소</button></div>`:''}</div>`}
-function chooseDate(id){ensureGameState();if(state.day<2){toast('데이트는 DAY 02부터 신청할 수 있습니다.');return}state.dateChoice=id;save();render()}
+const dateLocations=[
+ {id:'cafe',name:'조용한 카페',time:'14:00',desc:'마주 앉아 천천히 이야기를 나누기 좋은 곳',mood:'calm'},
+ {id:'walk',name:'강변 산책로',time:'16:00',desc:'나란히 걸으며 자연스럽게 대화할 수 있는 곳',mood:'open'},
+ {id:'dinner',name:'작은 레스토랑',time:'19:00',desc:'식사를 함께하며 서로의 취향을 알아가는 곳',mood:'warm'},
+ {id:'gallery',name:'전시 공간',time:'15:00',desc:'작품을 함께 보고 각자의 생각을 나누는 곳',mood:'curious'}
+];
+const dateThemes=[
+ {id:'daily',name:'요즘의 일상',desc:'최근 어떻게 지내는지 가볍게 나눈다.',quick:'요즘 어떻게 지내는지 묻는다.'},
+ {id:'memory',name:'함께한 기억',desc:'둘 사이에 남아 있는 지난 순간을 떠올린다.',quick:'함께했던 기억을 꺼낸다.'},
+ {id:'future',name:'앞으로의 이야기',desc:'앞으로 해보고 싶은 일과 바라는 관계를 이야기한다.',quick:'앞으로 해보고 싶은 일을 묻는다.'},
+ {id:'love',name:'연애에 대한 생각',desc:'좋아하는 마음과 관계에 대한 생각을 나눈다.',quick:'연애에 대한 생각을 조심스럽게 묻는다.'}
+];
+function date(){
+ const used=state.dateHistory.some(x=>x.day===state.day);
+ const selected=people.find(p=>p.id===state.dateChoice);
+ const location=dateLocations.find(x=>x.id===state.dateLocation);
+ return `<div class="screen">${header('A MOMENT TOGETHER','DATE','DAY '+String(state.day).padStart(2,'0'))}<p class="subcopy">${state.day<2?'데이트는 DAY 02부터 신청할 수 있습니다.':'함께 시간을 보내고 싶은 참가자와 장소를 선택하세요. 중요한 데이트는 여러 장면으로 이어집니다.'}</p>
+ <div class="ticket"><div class="ticket-top"><span>DATE TICKET · OUR SEASON</span><span>DAY ${String(state.day).padStart(2,'0')}</span></div><h3>${selected?selected.name:'TO SOMEONE'}</h3><p>${location?location.name+' · '+location.time:'오늘의 목적지는 아직 정해지지 않았습니다.'}</p><div class="ticket-data">DATE INFO<br>▦　DAY ${String(state.day).padStart(2,'0')}<br>⌖　${location?location.name:'장소 선택 전'}<br>◷　${location?location.time:'시간 미정'}</div></div>
+ ${used?'<div class="home-notice-card completed">오늘의 데이트를 완료했습니다. 다음 날 새로운 데이트가 열립니다.</div>':`<div class="section-title"><span>CHOOSE YOUR DATE</span><span>6 HOUSEMATES</span></div><div class="chat-list date-list">${people.map(p=>`<button class="chat-person ${state.dateChoice===p.id?'selected':''}" onclick="chooseDate('${p.id}')"><div class="avatar date-avatar"><img src="${p.photo}" alt="${p.name} 프로필 사진"></div><div class="chat-main"><b>${p.name}</b><small>${(state.scores[p.id]||0)>=20?'서로 조금 더 가까워진 사이':'함께 시간을 보내 보세요'}</small></div><span>${state.dateChoice===p.id?'선택됨':'→'}</span></button>`).join('')}</div>
+ ${selected?`<div class="section-title"><span>CHOOSE A PLACE</span><span>DATE SPOT</span></div><div class="date-place-grid">${dateLocations.map(x=>`<button class="quest-card ${state.dateLocation===x.id?'done':''}" onclick="state.dateLocation='${x.id}';save();render()"><span class="quest-check">${state.dateLocation===x.id?'✓':''}</span><span class="quest-copy"><b>${x.name}</b><small>${x.desc}</small></span></button>`).join('')}</div><button class="primary wide" style="margin-top:14px" onclick="startDate()" ${state.dateLocation?'':'disabled'}>데이트 초대하기 →</button>`:''}`}</div>`
+}
+function chooseDate(id){ensureGameState();if(state.day<2){toast('데이트는 DAY 02부터 신청할 수 있습니다.');return}if(state.dateHistory.some(x=>x.day===state.day)){toast('오늘의 데이트는 이미 진행했습니다.');return}state.dateChoice=id;state.dateLocation=null;save();render()}
+function dateDeepMode(day){return [3,5,8].includes(day)}
+function startDate(){
+ ensureGameState();if(!state.dateChoice){toast('데이트 상대를 먼저 선택해 주세요.');return}
+ if(!state.dateLocation){toast('데이트 장소를 선택해 주세요.');return}
+ const p=person(state.dateChoice),loc=dateLocations.find(x=>x.id===state.dateLocation);
+ if(state.day<2){toast('데이트는 DAY 02부터 진행할 수 있습니다.');return}
+ if(state.dateHistory.some(x=>x.day===state.day)){toast('오늘의 데이트는 이미 진행했습니다.');return}
+ state.activeDate={day:state.day,id:p.id,location:loc.id,step:0,theme:null,actions:[],deep:dateDeepMode(state.day)};
+ save();
+ if(state.activeDate.deep)openDateScene('opening');
+ else openQuickDate();
+}
+const dateScenes={
+ opening:{title:'둘만의 시간',text:'약속한 장소에 도착했다. 처음에는 가벼운 안부를 나누지만, 둘만 남자 대화의 속도가 조금 느려진다. 오늘은 평소보다 서로에게 집중할 수 있을 것 같다.'},
+ conversation:{title:'대화가 깊어지는 순간',text:'상대는 잠시 생각하다가 자신의 이야기를 꺼낸다. 어떤 태도로 반응하느냐에 따라 오늘의 분위기가 달라질 수 있다.'},
+ closing:{title:'헤어지기 전',text:'어느새 약속한 시간이 끝나간다. 마지막으로 어떤 마음을 남길지 선택할 수 있다.'}
+};
+function openDateScene(which){
+ const d=state.activeDate;if(!d)return;const p=person(d.id),loc=dateLocations.find(x=>x.id===d.location),scene=dateScenes[which];
+ let choices=[];
+ if(which==='opening')choices=[
+  ['상대가 먼저 이야기할 때까지 편하게 기다린다.',0,'patient'],
+  ['오늘 어떤 하루였는지 먼저 물어본다.',1,'attentive'],
+  ['장소와 분위기에 관한 가벼운 이야기로 시작한다.',0,'light']
+ ];
+ if(which==='conversation')choices=[
+  ['말을 끊지 않고 끝까지 들어 준다.',1,'listen'],
+  ['나의 생각과 비슷한 경험도 솔직하게 나눈다.',1,'share'],
+  ['무거워지지 않도록 다른 화제로 전환한다.',0,'redirect']
+ ];
+ if(which==='closing')choices=[
+  ['다음에 함께하고 싶은 일을 구체적으로 제안한다.',2,'future'],
+  ['오늘 즐거웠다고 담백하게 전한다.',1,'warm'],
+  ['상대의 기분을 먼저 물어본다.',1,'consider']
+ ];
+ gameModal(`<div class="smallcaps">DAY ${String(d.day).padStart(2,'0')} · DATE SCENE</div><h2 style="font-size:25px;margin:10px 0">${scene.title}</h2><div class="muted" style="font-size:12px;margin-bottom:12px">${p.name} · ${loc.name}</div><p style="line-height:1.9">${scene.text}</p><div style="display:grid;gap:9px;margin-top:18px">${choices.map((c,i)=>`<button class="choice" onclick="chooseDateScene('${which}',${i})">${c[0]}</button>`).join('')}</div>`);
+}
+function chooseDateScene(which,index){
+ const d=state.activeDate;if(!d)return;
+ const all={
+ opening:[['상대가 먼저 이야기할 때까지 편하게 기다린다.',0,'patient'],['오늘 어떤 하루였는지 먼저 물어본다.',1,'attentive'],['장소와 분위기에 관한 가벼운 이야기로 시작한다.',0,'light']],
+ conversation:[['말을 끊지 않고 끝까지 들어 준다.',1,'listen'],['나의 생각과 비슷한 경험도 솔직하게 나눈다.',1,'share'],['무거워지지 않도록 다른 화제로 전환한다.',0,'redirect']],
+ closing:[['다음에 함께하고 싶은 일을 구체적으로 제안한다.',2,'future'],['오늘 즐거웠다고 담백하게 전한다.',1,'warm'],['상대의 기분을 먼저 물어본다.',1,'consider']]
+ };
+ const c=all[which][index];d.actions.push({scene:which,index,kind:c[2],value:c[1]});
+ closeGameModal();
+ if(which==='opening')openDateTheme();
+ else if(which==='conversation')openDateScene('closing');
+ else completeDate(d.id,d.theme,d.actions,true);
+}
+function openDateTheme(){
+ const d=state.activeDate,p=person(d.id);
+ gameModal(`<div class="smallcaps">CONVERSATION TOPIC</div><h2 style="font-size:25px;margin:10px 0">${p.name}와 어떤 이야기를 나눌까?</h2><p>대화 주제에 따라 데이트의 분위기와 후속 메시지가 달라집니다.</p><div style="display:grid;gap:9px;margin-top:16px">${dateThemes.map(t=>`<button class="choice" onclick="selectDateTheme('${t.id}')"><b>${t.name}</b><small style="display:block;margin-top:4px;opacity:.7">${t.desc}</small></button>`).join('')}</div>`);
+}
+function selectDateTheme(id){
+ const d=state.activeDate;if(!d)return;d.theme=id;save();closeGameModal();openDateScene('conversation');
+}
+function openQuickDate(){
+ const d=state.activeDate,p=person(d.id),loc=dateLocations.find(x=>x.id===d.location);
+ gameModal(`<div class="smallcaps">DAY ${String(d.day).padStart(2,'0')} · DATE</div><h2 style="font-size:25px;margin:10px 0">${p.name}와의 데이트</h2><p>${loc.name}에서 ${p.name}와 시간을 보낸다. 오늘은 어떤 이야기를 나눌까?</p><div style="display:grid;gap:9px;margin-top:18px">${dateThemes.map((t,i)=>`<button class="choice" onclick="completeDate('${p.id}','${t.id}',[{scene:'quick',kind:'${t.id}',value:${[2,2,1,3][i]}}],false)"><b>${t.name}</b><small style="display:block;margin-top:4px;opacity:.7">${t.desc}</small></button>`).join('')}</div>`);
+}
+function completeDate(id,theme,actions,deep){
+ const p=person(id),d=state.activeDate,loc=dateLocations.find(x=>x.id===d.location),themeObj=dateThemes.find(x=>x.id===theme)||dateThemes[0];
+ const actionValue=actions.reduce((n,a)=>n+(a.value||0),0),themeBonus=({daily:1,memory:2,future:1,love:2})[theme]||0;
+ const affinity=Math.min(8,2+actionValue+themeBonus),trust=Math.min(5,actions.filter(a=>['listen','share','attentive','consider'].includes(a.kind)).length*2+ (theme==='love'?1:0)),intimacy=Math.min(5,deep?2:1);
+ state.relationships=state.relationships||{};state.relationships[id]=state.relationships[id]||{trust:0,intimacy:0,tension:0};
+ const rel=state.relationships[id];rel.trust=Math.max(0,Math.min(100,rel.trust+trust));rel.intimacy=Math.max(0,Math.min(100,rel.intimacy+intimacy));rel.tension=Math.max(0,rel.tension+(actions.some(a=>a.kind==='redirect')?1:0)- (actions.some(a=>a.kind==='consider')?1:0));
+ const follow=(dateFollowupMessages[id]||[])[theme==='memory'?1:theme==='daily'?2:theme==='future'?0:0]||`${p.name}와 오늘의 시간이 즐거웠다는 메시지가 도착했다.`;
+ const text=follow.replaceAll('{{userName}}',state.name||'');
+ state.dateHistory=state.dateHistory||[];state.relationships=state.relationships||{};people.forEach(p=>{state.relationships[p.id]=state.relationships[p.id]||{trust:0,intimacy:0,tension:0};});state.dateHistory.push({day:state.day,id,location:d.location,theme,deep,actions,affinity,trust,intimacy});
+ state.messages[id].push({from:'them',text,day:state.day,dateFollowup:true,dateReplied:false});
+ changeRel(id,affinity,`${p.name}와 DAY ${state.day} ${loc.name} 데이트 · ${themeObj.name}`);
+ state.activeDate=null;state.dateChoice=null;state.dateLocation=null;markQuest('date');closeGameModal();notify(`${p.name}에게서 데이트 후 메시지가 도착했습니다.`,id);render();
+}
+
 function mapScreen(){markQuest('map');subpage='map';render()}
-function mapView(){return `<div class="screen"><button class="back" onclick="subpage=null;render()">← MY로 돌아가기</button>${header('THE CONNECTIONS','RELATIONSHIP','DAY '+String(state.day).padStart(2,'0'))}<p class="subcopy">열흘 동안 쌓이는 관계를 노선도로 기록합니다.</p><div class="map-card"><svg viewBox="0 0 340 300"><path d="M10 40H80L110 75H210L250 40H330" fill="none" stroke="#477d91" stroke-width="4"/><path d="M0 250H70L110 205H200L260 245H340" fill="none" stroke="#729579" stroke-width="4"/><path d="M60 0L80 65L145 120L200 80L270 160L290 300" fill="none" stroke="#b74743" stroke-width="8"/><path d="M340 100H265L230 140H145L90 220H0" fill="none" stroke="#d2b84c" stroke-width="4"/><path d="M0 160H65L100 130H165L205 180H340" fill="none" stroke="#9079a0" stroke-width="4"/><g fill="#f5f0e7" stroke="#62574d" stroke-width="2"><circle cx="80" cy="40" r="6"/><circle cx="110" cy="75" r="6"/><circle cx="210" cy="75" r="6"/><circle cx="70" cy="250" r="6"/><circle cx="110" cy="205" r="6"/><circle cx="200" cy="205" r="6"/><circle cx="145" cy="120" r="7"/><circle cx="200" cy="80" r="6"/><circle cx="270" cy="160" r="6"/></g><text x="145" y="145" font-size="10" fill="#8e3833" text-anchor="middle">OUR SEASON</text></svg><div class="map-legend">${people.map((p,i)=>`<div class="legend-item"><span class="dot" style="background:${p.line}"></span>${p.name} <span class="muted">LINE ${i+1}</span></div>`).join('')}</div></div><div class="notice">관계 노선도는 프로그램 진행에 따라 새로운 사건과 교차 지점이 추가됩니다.</div></div>`}
+function mapView(){return `<div class="screen"><button class="back" onclick="subpage=null;render()">← MY로 돌아가기</button>${header('THE CONNECTIONS','RELATIONSHIP','DAY '+String(state.day).padStart(2,'0'))}<p class="subcopy">열흘 동안 쌓이는 관계를 노선도로 기록합니다.</p><div class="map-card"><svg viewBox="0 0 340 300"><path d="M10 40H80L110 75H210L250 40H330" fill="none" stroke="#477d91" stroke-width="4"/><path d="M0 250H70L110 205H200L260 245H340" fill="none" stroke="#729579" stroke-width="4"/><path d="M60 0L80 65L145 120L200 80L270 160L290 300" fill="none" stroke="#b74743" stroke-width="8"/><path d="M340 100H265L230 140H145L90 220H0" fill="none" stroke="#d2b84c" stroke-width="4"/><path d="M0 160H65L100 130H165L205 180H340" fill="none" stroke="#9079a0" stroke-width="4"/><g fill="#f5f0e7" stroke="#62574d" stroke-width="2"><circle cx="80" cy="40" r="6"/><circle cx="110" cy="75" r="6"/><circle cx="210" cy="75" r="6"/><circle cx="70" cy="250" r="6"/><circle cx="110" cy="205" r="6"/><circle cx="200" cy="205" r="6"/><circle cx="145" cy="120" r="7"/><circle cx="200" cy="80" r="6"/><circle cx="270" cy="160" r="6"/></g><text x="145" y="145" font-size="10" fill="#8e3833" text-anchor="middle">OUR SEASON</text></svg><div class="map-legend">${people.map((p,i)=>`<div class="legend-item"><span class="dot" style="background:${p.line}"></span>${p.name} <span class="muted">LINE ${i+1}</span></div>`).join('')}</div></div><div class="section-title"><span>RELATIONSHIP STATUS</span><span>YOUR CONNECTIONS</span></div><div class="menu-list">${people.map(p=>{const r=(state.relationships||{})[p.id]||{trust:0,intimacy:0,tension:0};return `<div class="menu-row" style="display:block;padding:13px 15px"><div style="display:flex;justify-content:space-between;align-items:center"><b>${p.name}</b><small>호감 ${state.scores[p.id]||0}</small></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;font-size:11px;color:var(--muted)"><span>신뢰도 ${r.trust}</span><span>친밀도 ${r.intimacy}</span><span>긴장감 ${r.tension}</span></div></div>`}).join('')}</div><div class="notice">관계 노선도는 프로그램 진행에 따라 새로운 사건과 교차 지점이 추가됩니다.</div></div>`}
 function letters(){markQuest('letterbox');subpage='letters';render()}
 function lettersView(){return `<div class="screen"><button class="back" onclick="subpage=null;render()">← MY로 돌아가기</button>${header('WORDS FROM SOMEONE','LETTER','ANONYMOUS')}<p class="subcopy">누군가 당신에게 남긴 마음을 확인해 보세요.</p><div class="letter"><div class="smallcaps" style="text-align:center">A LETTER FOR YOU</div><h3>익명의 편지</h3><p>누군가 당신에게<br>마음을 전했습니다.<br><br>아직 누구의 편지인지는 알 수 없습니다.</p><button class="primary wide" onclick="openLetter()">편지 열어보기</button></div><div class="section-title"><span>MY LETTER BOX</span><span>${state.letters.length} RECEIVED</span></div><div class="menu-list"><button class="menu-row" onclick="openLetter()">도착한 편지 확인하기 <span>→</span></button></div></div>`}
 function openLetter(){toast('아직 도착한 편지가 없습니다. DAY 03부터 확인할 수 있습니다.')}
@@ -552,7 +647,7 @@ function showUserProfile(){
  const panel=document.getElementById('gameModalPanel');if(panel){panel.style.background='#FFFEFC';panel.style.borderColor='#DCE5EB';panel.style.color='#303B43';panel.style.borderRadius='22px';}
  const modal=document.getElementById('gameModal');if(modal)modal.style.background='rgba(28,43,54,.48)';
 }
-function my(){return `<div class="screen">${header('YOUR ARCHIVE','MY','PROFILE')}<div class="menu-list"><div class="chat-person"><div class="avatar" style="background:#587F9D">${(state.name||'나').slice(0,1)}</div><div class="chat-main"><b>${state.name}</b><p>${state.age}세 · OUR SEASON 참가자</p></div></div><button class="menu-row" onclick="showUserProfile()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">◎</span>　내 프로필 보기 <span>→</span></button><button class="menu-row" onclick="letters()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">✉</span>　받은 편지함 <span>→</span></button><button class="menu-row" onclick="mapScreen()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">⌘</span>　관계 노선도 <span>→</span></button><button class="menu-row" onclick="toast('데이트 기록은 데이트를 완료하면 여기에 기록됩니다.')"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">▤</span>　데이트 기록 <span>→</span></button><button class="menu-row" onclick="resetGame()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">↻</span>　처음부터 다시 시작 <span>→</span></button></div><div class="ticket" style="text-align:center"><div class="ticket-top"><span>OUR SEASON</span><span>PERSONAL ARCHIVE</span></div><h3>DAY ${String(state.day).padStart(2,'0')} / 10</h3><p>당신의 열흘이 기록되고 있습니다.</p></div></div>`}
+function my(){return `<div class="screen">${header('YOUR ARCHIVE','MY','PROFILE')}<div class="menu-list"><div class="chat-person"><div class="avatar" style="background:#587F9D">${(state.name||'나').slice(0,1)}</div><div class="chat-main"><b>${state.name}</b><p>${state.age}세 · OUR SEASON 참가자</p></div></div><button class="menu-row" onclick="showUserProfile()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">◎</span>　내 프로필 보기 <span>→</span></button><button class="menu-row" onclick="mapScreen()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">⌘</span>　관계 노선도 <span>→</span></button><button class="menu-row" onclick="toast('데이트 기록은 데이트를 완료하면 여기에 기록됩니다.')"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">▤</span>　데이트 기록 <span>→</span></button><button class="menu-row" onclick="resetGame()"><span class="menu-icon" style="display:grid;place-items:center;color:#587F9D;font-size:20px">↻</span>　처음부터 다시 시작 <span>→</span></button></div><div class="ticket" style="text-align:center"><div class="ticket-top"><span>OUR SEASON</span><span>PERSONAL ARCHIVE</span></div><h3>DAY ${String(state.day).padStart(2,'0')} / 10</h3><p>당신의 열흘이 기록되고 있습니다.</p></div></div>`}
 function render(){nav();let html;if(subpage==='map')html=mapView();else if(subpage==='letters')html=lettersView();else if(selectedPerson)html=profile();else if(currentTab==='home')html=home();else if(currentTab==='cast')html=cast();else if(currentTab==='chat')html=chat();else if(currentTab==='date')html=date();else if(currentTab==='my')html=my();$('#screen').innerHTML=html}
 
 /* 기능 확장: index(7).html의 진행/관계/이벤트 흐름을 현재 디자인에 맞춰 이식 */
