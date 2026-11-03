@@ -391,43 +391,140 @@ function markQuest(id){
 function questDone(id){
  ensureQuestDay();
  if(id==='first')return (state.firstImpressions||[]).length>0;
+ if(id==='story')return storyDone();
  if(id==='date')return (state.dateHistory||[]).some(x=>x.day===state.day);
  return state.questActions.completed.includes(id);
 }
+
+const dayStories={
+ 1:{title:'다시, 한집에서',tag:'WELCOME BACK',place:'공용 거실 · 오후 7시',body:'오랜만에 한 공간에 모인 여섯 사람. 반가움과 어색함이 섞인 인사가 오간다. 저녁 식사가 끝나갈 무렵, 제작진이 첫인상 선택을 안내한다.',choices:[
+  {label:'먼저 말을 걸어 분위기를 풀어 본다.',effect:2,kind:'open',result:'먼저 건넨 말에 몇 사람이 편하게 웃었다. 누군가는 당신의 자연스러운 태도를 기억한다.'},
+  {label:'사람들의 대화를 조금 더 지켜본다.',effect:1,kind:'observe',result:'서두르지 않고 분위기를 살폈다. 누가 누구와 편하게 지내는지 조금씩 보이기 시작한다.'},
+  {label:'익숙한 사람 곁에 조용히 앉는다.',effect:1,kind:'quiet',result:'낯선 분위기 속에서도 편안한 자리를 찾았다. 짧은 대화였지만 오래 알고 지낸 사이의 온기가 남았다.'}
+ ]},
+ 2:{title:'첫 번째 초대',tag:'FIRST INVITATION',place:'하우스 라운지 · 오후 2시',body:'아침 식사 뒤, 제작진이 첫 데이트 시간을 공지한다. 누군가와 단둘이 시간을 보내는 건 생각보다 큰 선택처럼 느껴진다. 첫인상으로 선택한 사람의 메시지도 도착해 있다.',choices:[
+  {label:'먼저 마음이 가는 사람을 초대한다.',effect:3,kind:'direct',result:'망설임보다 솔직함을 택했다. 상대는 당신의 초대를 의외로 반갑게 받아들인다.'},
+  {label:'평소와 다른 면을 알아보고 싶은 사람을 고른다.',effect:2,kind:'curious',result:'새로운 가능성을 열어 두었다. 예상하지 못한 대화가 시작될지도 모른다.'},
+  {label:'상대가 편하게 느낄 수 있도록 가볍게 제안한다.',effect:2,kind:'gentle',result:'부담스럽지 않은 초대가 오갔다. 두 사람 사이에 작은 약속이 생겼다.'}
+ ]},
+ 3:{title:'둘만의 시간',tag:'A PRIVATE MOMENT',place:'데이트 장소 · 오후 4시',body:'첫 공식 데이트가 시작된다. 함께 있는 동안에는 다른 참가자들의 시선도, 하우스의 소음도 잠시 멀어진다. 평소에는 하지 못했던 이야기를 꺼낼 기회다.',choices:[
+  {label:'요즘 가장 신경 쓰이는 일을 물어본다.',effect:3,kind:'care',result:'상대는 잠시 생각한 뒤 속마음을 들려준다. 대화는 조금 더 진지해졌다.'},
+  {label:'함께 지냈던 예전 기억을 꺼낸다.',effect:3,kind:'memory',result:'잊고 있던 장면을 함께 떠올렸다. 두 사람만 아는 기억이 오늘의 대화를 이어 준다.'},
+  {label:'가볍고 편안한 이야기로 웃음을 나눈다.',effect:2,kind:'light',result:'억지로 깊어지려 하지 않았다. 편안한 웃음이 다음 만남을 기대하게 만든다.'}
+ ]},
+ 4:{title:'다른 시선',tag:'A DIFFERENT SIDE',place:'공용 주방 · 오후 6시',body:'오늘은 평소와 다른 조합으로 저녁을 준비하게 된다. 가까워졌다고 생각했던 사람에게서 새로운 면을 발견하고, 예상하지 못한 대화가 귀에 들어온다.',choices:[
+  {label:'새롭게 알게 된 면을 솔직하게 이야기한다.',effect:3,kind:'honest',result:'솔직한 감상을 전했다. 상대도 자신의 생각을 조금 더 편하게 꺼냈다.'},
+  {label:'다른 참가자의 이야기를 먼저 들어 본다.',effect:2,kind:'listen',result:'한발 물러서서 이야기를 들었다. 관계의 흐름을 조금 더 넓게 이해하게 됐다.'},
+  {label:'지금 가까운 사람과의 시간을 지킨다.',effect:2,kind:'steady',result:'현재의 관계에 집중했다. 익숙함 속에서도 새롭게 확인한 마음이 있었다.'}
+ ]},
+ 5:{title:'마음의 온도',tag:'MIDPOINT',place:'테라스 · 밤 9시',body:'프로그램의 절반이 지났다. 제작진은 참가자들에게 지금 가장 솔직하게 이야기하고 싶은 사람을 떠올려 보라고 한다. 오늘의 선택은 이후 대화의 방향에 영향을 줄 수 있다.',choices:[
+  {label:'마음이 향하는 사람에게 먼저 다가간다.',effect:4,kind:'confess',result:'조심스럽지만 분명하게 다가갔다. 상대는 오늘의 행동을 쉽게 잊지 못할 것이다.'},
+  {label:'아직 정리되지 않은 마음을 솔직히 말한다.',effect:2,kind:'uncertain',result:'확신이 없다는 사실까지 숨기지 않았다. 솔직함은 때로 관계를 천천히 움직인다.'},
+  {label:'상대의 마음을 먼저 물어본다.',effect:3,kind:'ask',result:'대답을 재촉하지 않고 물었다. 상대는 자신의 마음을 돌아볼 시간을 얻었다.'}
+ ]},
+ 6:{title:'엇갈린 저녁',tag:'CROSSING PATHS',place:'다이닝룸 · 오후 8시',body:'저녁 식사 자리에서 미묘한 기류가 흐른다. 누군가의 관심이 다른 사람에게 향하고 있다는 사실을 알게 될 수도 있다. 마음이 복잡해져도 오늘은 직접 선택해야 한다.',choices:[
+  {label:'신경 쓰이는 일을 당사자에게 묻는다.',effect:3,kind:'confront',result:'불편한 질문을 피하지 않았다. 대화는 쉽지 않았지만 오해를 줄일 기회가 생겼다.'},
+  {label:'지금은 판단하지 않고 지켜본다.',effect:1,kind:'wait',result:'성급하게 결론 내리지 않기로 했다. 대신 작은 표정과 말투가 오래 마음에 남았다.'},
+  {label:'내 마음을 먼저 정리하고 거리를 둔다.',effect:2,kind:'space',result:'잠시 혼자만의 시간을 가졌다. 상대도 당신의 달라진 태도를 알아차린 듯하다.'}
+ ]},
+ 7:{title:'말하지 못했던 이야기',tag:'AFTER HOURS',place:'테라스 · 밤 10시',body:'하루 일정이 끝난 뒤, 한 참가자가 조용히 대화를 청한다. 평소에는 꺼내지 못했던 과거와 고민이 오간다. 듣는 태도 역시 관계를 만드는 선택이다.',choices:[
+  {label:'말을 끊지 않고 끝까지 들어 준다.',effect:4,kind:'trust',result:'상대는 자신의 이야기를 끝까지 들어 준 당신에게 고마움을 느낀다.'},
+  {label:'나의 비슷한 경험도 조심스럽게 나눈다.',effect:3,kind:'share',result:'서로의 이야기가 이어졌다. 두 사람 사이에 이전과 다른 신뢰가 생겼다.'},
+  {label:'무리해서 말하지 않아도 된다고 전한다.',effect:3,kind:'respect',result:'상대의 속도를 존중했다. 말하지 않아도 괜찮다는 배려가 오래 남았다.'}
+ ]},
+ 8:{title:'마지막 데이트 신청',tag:'ONE MORE DATE',place:'하우스 게시판 · 오전 11시',body:'남은 데이트 기회는 많지 않다. 오늘은 마지막으로 함께 시간을 보내고 싶은 사람을 정해야 한다. 지금까지의 선택을 돌아보며 누구에게 마음을 전할지 생각한다.',choices:[
+  {label:'가장 오래 마음에 남은 사람을 선택한다.',effect:4,kind:'priority',result:'가장 오래 마음에 남은 사람을 떠올렸다. 마지막 데이트는 그 마음을 확인할 시간이 될 것이다.'},
+  {label:'아직 충분히 알아보지 못한 사람을 선택한다.',effect:3,kind:'newpath',result:'남아 있는 가능성을 확인하기로 했다. 마지막 기회가 새로운 방향을 만들 수도 있다.'},
+  {label:'상대의 의사를 먼저 확인한다.',effect:3,kind:'consider',result:'나의 마음만큼 상대의 마음도 중요하다고 생각했다. 조심스러운 배려가 전해졌다.'}
+ ]},
+ 9:{title:'마지막 밤의 편지',tag:'THE LAST NIGHT',place:'개인 공간 · 밤 11시',body:'최종 선택을 하루 앞둔 밤. 하우스는 평소보다 조용하다. 지금까지 받은 메시지와 함께한 시간을 돌아보며, 마지막으로 누구에게 마음을 전할지 결정해야 한다.',choices:[
+  {label:'가장 솔직한 마음을 편지에 담는다.',effect:4,kind:'letter',result:'꾸미지 않은 마음을 글로 남겼다. 편지는 내일의 선택을 앞두고 작은 용기가 된다.'},
+  {label:'상대에게 직접 마지막 대화를 청한다.',effect:3,kind:'talk',result:'마주 앉아 마지막 이야기를 나눴다. 말로 확인한 감정은 기록보다 선명하게 남았다.'},
+  {label:'아무에게도 서두른 답을 주지 않는다.',effect:1,kind:'reflect',result:'혼자 생각할 시간을 선택했다. 내일은 스스로에게도 솔직해야 한다.'}
+ ]},
+ 10:{title:'우리의 계절',tag:'FINAL DAY',place:'최종 선택 장소 · 오후 7시',body:'열흘 동안의 시간이 끝나간다. 함께 웃었던 순간과 엇갈렸던 마음, 말하지 못했던 감정까지 모두 오늘의 선택에 담긴다. 마지막으로 마음이 향하는 사람을 선택한다.',choices:[
+  {label:'내 마음을 믿고 마지막 선택을 준비한다.',effect:0,kind:'finalready',result:'지금까지의 시간을 돌아봤다. 이제 선택을 미룰 수 없다.'},
+  {label:'상대의 마음까지 생각하며 마지막 선택을 준비한다.',effect:0,kind:'finalcare',result:'나의 마음과 상대의 마음을 함께 생각했다. 결과와 관계없이 오늘은 솔직해야 한다.'},
+  {label:'어떤 결과든 받아들이기로 한다.',effect:0,kind:'finalaccept',result:'결과를 통제할 수는 없다. 다만 진심으로 선택할 수는 있다.'}
+ ]}
+};
+function storyDone(){return !!(state.storyChoices&&state.storyChoices[String(state.day)])}
+function storyChoiceEffect(id,choice){
+ ensureGameState();const story=dayStories[state.day];if(!story||storyDone())return;
+ state.storyChoices=state.storyChoices||{};
+ const eligible=person(id);
+ const target=id||((state.firstImpressions||[])[0])||null;
+ state.storyChoices[String(state.day)]={choice,kind:story.choices[choice].kind,target,day:state.day};
+ if(target&&story.choices[choice].effect)changeRel(target,story.choices[choice].effect,`${story.title}: ${story.choices[choice].label}`);
+ else logEvent(`${story.title}: ${story.choices[choice].label}`);
+ markQuest('story');
+ closeGameModal();render();
+ toast(story.choices[choice].result);
+}
+function openDayStory(){
+ ensureGameState();const story=dayStories[state.day];if(!story)return;
+ if(storyDone()){toast('오늘의 주요 이야기를 이미 진행했습니다.');return;}
+ const target=(state.firstImpressions||[])[0]||people[0].id;
+ gameModal(`<div class="smallcaps">DAY ${String(state.day).padStart(2,'0')} · ${story.tag}</div><h2 style="font-size:26px;line-height:1.35;margin:10px 0">${story.title}</h2><div class="muted" style="font-size:12px;margin-bottom:12px">${story.place}</div><p style="line-height:1.9">${story.body}</p><div style="display:grid;gap:9px;margin-top:18px">${story.choices.map((c,i)=>`<button class="choice" onclick="storyChoiceEffect('${target}',${i})">${c.label}</button>`).join('')}</div>`);
+}
+function conditionalEventAvailable(){
+ if(state.day<4||state.day>9)return false;
+ const max=Math.max(...people.map(p=>state.scores[p.id]||0));
+ return max>=({4:12,5:16,6:20,7:24,8:28,9:32}[state.day]||99) && !(state.conditionalEvents||[]).includes(state.day);
+}
+function openConditionalEvent(){
+ if(!conditionalEventAvailable())return;
+ const top=people.slice().sort((a,b)=>(state.scores[b.id]||0)-(state.scores[a.id]||0))[0];
+ const texts=[
+  '당신과 가장 많은 시간을 보낸 참가자가 다른 사람들보다 조금 늦게 공용 공간에 남아 있다. 오늘 있었던 일을 더 이야기하고 싶다고 한다.',
+  '누군가 당신에게만 보여 주고 싶은 사진이 있다며 조용히 휴대전화를 내민다. 사진 속에는 함께 지나온 시간이 담겨 있다.',
+  '평소보다 짧은 메시지가 도착한다. 길지 않은 문장인데도 오늘은 쉽게 넘길 수 없다.',
+  '다른 참가자와 대화하던 중 당신의 이름이 나온다. 예상하지 못한 방식으로 관계의 흐름을 알게 된다.',
+  '최종 선택을 앞두고 한 참가자가 먼저 솔직한 마음을 전한다. 대답을 재촉하지는 않지만 진심은 분명하다.',
+  '마지막 밤, 한 참가자가 잠들기 전 잠깐 이야기할 수 있냐고 묻는다.'
+ ];
+ const body=texts[Math.min(state.day-4,texts.length-1)];
+ gameModal(`<div class="smallcaps">UNLOCKED · PRIVATE MOMENT</div><h2 style="font-size:25px;margin:10px 0">${top.name}의 작은 신호</h2><p style="line-height:1.9">${body}</p><button class="choice" style="width:100%;margin-top:12px" onclick="finishConditionalEvent('${top.id}')">조금 더 이야기한다</button><button class="secondary" style="width:100%;margin-top:8px" onclick="closeGameModal()">지금은 돌아간다</button>`);
+}
+function finishConditionalEvent(id){
+ state.conditionalEvents=state.conditionalEvents||[];if(state.conditionalEvents.includes(state.day))return;
+ state.conditionalEvents.push(state.day);changeRel(id,4,`${person(id).name}와 특별한 시간을 보냈다.`);closeGameModal();render();toast('특별한 순간이 관계 기록에 추가되었습니다.');
+}
+
 function getDailyQuests(){
- if(state.day===1)return [
+ const base=[{id:'story',title:'오늘의 주요 이야기 확인하기',description:'오늘의 사건을 확인하고 선택을 남기세요.',action:'openDayStory()'}];
+ if(state.day===1)return base.concat([
   {id:'first',title:'첫인상 전하기',description:'오늘 마음이 향하는 참가자 한 명을 선택하세요.',action:'showFirstImpression()'},
   {id:'profile',title:'참가자 프로필 살펴보기',description:'CAST에서 참가자 한 명의 상세 프로필을 확인하세요.',action:"currentTab='cast';selectedPerson=null;render()"},
   {id:'reply',title:'첫 대화에 답장하기',description:'CHAT에서 참가자의 메시지에 답장을 보내세요.',action:"currentTab='chat';activeChat=null;render()"},
   {id:'map',title:'관계 노선도 확인하기',description:'지금까지의 관계 흐름을 살펴보세요.',action:'mapScreen()'}
- ];
- if(state.day===2){
-  const firstMatch=(state.firstImpressions||[])[0];
-  const day2Quests=[
-   {id:'reply',title:'도착한 메시지에 답장하기',description:'먼저 연락해 온 참가자의 메시지에 답장하세요.',action:"currentTab='chat';activeChat=null;render()"},
-   {id:'date',title:'오늘의 데이트 진행하기',description:'DATE에서 한 명을 선택해 데이트를 완료하세요.',action:"currentTab='date';render()"},
-   {id:'map',title:'관계 노선도 확인하기',description:'오늘까지 달라진 관계를 확인하세요.',action:'mapScreen()'}
-  ];
-  if(firstMatch)day2Quests.unshift({id:'firstMessage',title:'첫인상 메시지 확인하기',description:`첫인상으로 선택한 ${person(firstMatch)?.name||'참가자'}의 메시지를 확인하세요.`,action:`openChat('${firstMatch}')`});
-  return day2Quests;
- }
- return [
-  {id:'date',title:'오늘의 데이트 진행하기',description:'DATE에서 한 명을 선택해 데이트를 완료하세요.',action:"currentTab='date';render()"},
-  {id:'reply',title:'도착한 메시지에 답장하기',description:'데이트 후 도착한 참가자의 메시지를 확인하고 답장하세요.',action:"currentTab='chat';activeChat=null;render()"},
-  {id:'letterbox',title:'익명의 편지함 확인하기',description:'MY에서 도착한 익명의 편지를 확인하세요.',action:'letters()'}
- ];
+ ]);
+ if(state.day===2)return base.concat([
+  {id:'firstMessage',title:'첫인상 메시지 확인하기',description:'첫인상으로 선택한 참가자의 메시지를 확인하세요.',action:`openChat('${(state.firstImpressions||[])[0]||people[0].id}')`},
+  {id:'date',title:'첫 데이트 진행하기',description:'DATE에서 한 명을 선택해 데이트를 완료하세요.',action:"currentTab='date';render()"},
+  {id:'reply',title:'도착한 메시지에 답장하기',description:'참가자의 메시지를 확인하고 답장하세요.',action:"currentTab='chat';activeChat=null;render()"}
+ ]);
+ return base.concat([
+  {id:'date',title:state.day===8?'마지막 데이트 진행하기':'오늘의 데이트 진행하기',description:'함께 시간을 보내고 싶은 참가자를 선택해 데이트를 완료하세요.',action:"currentTab='date';render()"},
+  {id:'reply',title:'대화 이어가기',description:'오늘 도착한 메시지를 확인하고 답장하세요.',action:"currentTab='chat';activeChat=null;render()"},
+  {id:'map',title:'관계 기록 돌아보기',description:'지금까지 달라진 관계의 흐름을 확인하세요.',action:'mapScreen()'}
+ ]);
 }
 
 function home(){
  let day=state.day, quests=getDailyQuests(), completed=quests.filter(q=>questDone(q.id)).length, allDone=completed===quests.length;
- let titles=['첫 만남','조금씩 가까워지는 시간','마음의 방향','첫 데이트','중간 인터뷰','새로운 선택','익명의 편지','마지막 데이트','마지막 밤','최종 선택'];
- return `<div class="screen">${header('YOUR JOURNEY','HOME',`DAY ${String(day).padStart(2,'0')} / 10`)}<p class="subcopy">이미 알고 있던 사이에서 시작되는 열흘간의 감정 기록.</p><div class="hero"><div class="hero-image">${routeSvg()}</div><div class="hero-body"><span class="day-pill">DAY ${String(day).padStart(2,'0')}</span><h3>${titles[day-1]}</h3><p>${day===1?'익숙한 얼굴들과 다시 한 공간에 모였습니다. 오늘의 마음을 하나씩 확인해 보세요.':'오늘의 퀘스트를 완료하며 참가자들과 조금 더 가까워져 보세요.'}</p></div></div>
+ let story=dayStories[day], titles=Object.values(dayStories).map(x=>x.title);
+ const unlocked=conditionalEventAvailable();
+ return `<div class="screen">${header('YOUR JOURNEY','HOME',`DAY ${String(day).padStart(2,'0')} / 10`)}<p class="subcopy">이미 알고 있던 사이에서 시작되는 열흘간의 감정 기록.</p>
+ <div class="hero"><div class="hero-image">${routeSvg()}</div><div class="hero-body"><span class="day-pill">DAY ${String(day).padStart(2,'0')} · ${story.tag}</span><h3>${story.title}</h3><p>${story.body}</p><button class="primary" style="margin-top:12px" onclick="openDayStory()" ${storyDone()?'disabled':''}>${storyDone()?'오늘의 이야기 완료':'오늘의 이야기 시작 →'}</button></div></div>
+ ${unlocked?`<button class="menu-row" style="width:100%;margin:14px 0;border:1px solid var(--line)" onclick="openConditionalEvent()"><span><b>UNLOCKED MOMENT</b><br><small>조건을 충족한 특별한 순간이 도착했습니다.</small></span><span>열어보기 →</span></button>`:''}
  <div class="section-title"><span>DAILY QUEST</span><span>${completed} / ${quests.length} COMPLETED</span></div>
- <div class="quest-progress"><span>오늘의 퀘스트를 모두 완료하면 다음 날로 넘어갈 수 있습니다.</span><b>${Math.round(completed/quests.length*100)}%</b></div>
+ <div class="quest-progress"><span>오늘의 주요 이야기와 일정을 완료하면 다음 날로 넘어갈 수 있습니다.</span><b>${Math.round(completed/quests.length*100)}%</b></div>
  <div class="quest-list">${quests.map(q=>`<button class="quest-card ${questDone(q.id)?'done':''}" ${questDone(q.id)?'disabled':''} onclick="${q.action}"><span class="quest-check">${questDone(q.id)?'✓':''}</span><span class="quest-copy"><b>${q.title}</b><small>${q.description}</small></span><span class="quest-state">${questDone(q.id)?'COMPLETED':'GO →'}</span></button>`).join('')}</div>
- <div class="home-notice"><div class="home-notice-head"><span>NOTICE</span><span class="status">${allDone?'COMPLETED':'IN PROGRESS'}</span></div><div class="home-notice-card ${allDone?'completed':''}"><span class="notice-message">${allDone?'오늘의 퀘스트를 모두 완료했습니다. 다음 날로 진행할 수 있습니다.':`오늘의 퀘스트 ${quests.length-completed}개가 남아 있습니다. 모든 항목을 완료해 주세요.`}</span></div></div>
+ <div class="home-notice"><div class="home-notice-head"><span>NOTICE</span><span class="status">${allDone?'COMPLETED':'IN PROGRESS'}</span></div><div class="home-notice-card ${allDone?'completed':''}"><span class="notice-message">${allDone?'오늘의 일정을 모두 완료했습니다. 다음 날로 진행할 수 있습니다.':`오늘의 일정 ${quests.length-completed}개가 남아 있습니다.`}</span></div></div>
  <div class="day-control"><div><small class="smallcaps">YOUR SEASON</small><br><b>DAY ${String(day).padStart(2,'0')} / 10</b></div><button class="primary" onclick="advanceDay()" ${allDone?'':'disabled'} style="${allDone?'':'opacity:.45;box-shadow:none'}">다음 날 진행 →</button></div></div>`
 }
+
 function cast(){return `<div class="screen">${header('MEET THE HOUSEMATES','CAST','6 PARTICIPANTS')}<p class="subcopy">사용자를 제외한 참가자 6명. 모두 프로그램 시작 전부터 서로 알고 지낸 사이입니다.</p><div class="cast-grid">${people.map(p=>`<button class="cast-card" onclick="openProfile('${p.id}')"><div class="cast-photo"><img class="cast-portrait" src="${p.photo}" alt="${p.name} 프로필 사진"></div><div class="cast-info"><div class="cast-name">${p.name}</div><div class="cast-meta">${p.age}세 · ${p.trait}</div></div></button>`).join('')}</div></div>`}
 function openProfile(id){markQuest('profile');selectedPerson=id;render()}
 function profile(){let p=person(selectedPerson);return `<div class="screen"><button class="back" onclick="selectedPerson=null;render()">← CAST로 돌아가기</button><div class="profile-cover"><img class="profile-portrait" src="${p.photo}" alt="${p.name} 프로필 사진"></div><div class="smallcaps">PARTICIPANT PROFILE · LINE ${people.indexOf(p)+1}</div><h2 class="profile-name">${p.name} <span style="font-size:14px;font-weight:400">${p.age}세</span></h2><div class="info-list"><div class="info-row"><b>성격</b>${p.personality}</div><div class="info-row"><b>좋아하는 것</b>${p.like}</div><div class="info-row"><b>싫어하는 것</b>${p.dislike}</div><div class="info-row"><b>우리의 관계</b>${p.relation}</div></div><button class="primary wide" style="margin-top:16px" onclick="openChat('${p.id}')">메시지 보내기 →</button></div>`}
@@ -455,6 +552,7 @@ function render(){nav();let html;if(subpage==='map')html=mapView();else if(subpa
 function ensureGameState(){
  if(!state)return;
  state.firstImpressions=state.firstImpressions||[];
+ state.storyChoices=state.storyChoices||{};state.conditionalEvents=state.conditionalEvents||[];state.dayHistory=state.dayHistory||[];
  state.scores=state.scores||{}; state.messages=state.messages||{};
  state.letters=state.letters||[]; state.events=state.events||[];
  state.dateHistory=state.dateHistory||[]; state.noticeRead=state.noticeRead||[];state.secretLetterLevels=state.secretLetterLevels||{};people.forEach(p=>{if(!Array.isArray(state.secretLetterLevels[p.id]))state.secretLetterLevels[p.id]=[]});if(!state.questActions||state.questActions.day!==state.day)state.questActions={day:state.day,completed:[]};
@@ -502,7 +600,37 @@ function openLetter(i=0){ensureGameState();if(!state.letters.length){toast('아�
 function showFinal(){ensureGameState();if(state.day<10){toast('최종 선택은 DAY 10에 진행할 수 있습니다.');return}gameModal(`<div class="smallcaps">DAY 10 · FINAL CHOICE</div><h2 style="font-family:Georgia,serif;font-size:30px">마지막 선택</h2><p>열흘 동안의 시간을 돌아보고 마음이 향하는 한 사람을 선택하세요. 선택은 되돌릴 수 없습니다.</p>${people.map(p=>`<button class="choice" style="display:block;width:100%;margin:8px 0" onclick="finalize('${p.id}')">${p.name}</button>`).join('')}<button class="secondary" style="width:100%" onclick="closeGameModal()">조금 더 생각하기</button>`)}
 function finalize(id){state.finalChoice=id;let mutual=relScore(id)>=20;logEvent(`${person(id).name}을(를) 최종 선택했다.`);save();let p=person(id);gameModal(`<div class="smallcaps">OUR SEASON · FINAL</div><h2 style="font-family:Georgia,serif;font-size:30px">당신의 최종 선택</h2><div style="text-align:center;margin:18px"><img src="${p.photo}" style="width:150px;height:190px;object-fit:cover;border-radius:14px"><h2>${p.name}</h2><p>${mutual?'서로의 마음이 같은 방향을 향했습니다.':'당신은 '+p.name+'을(를) 선택했습니다. 상대의 마음은 아직 같지 않을 수 있습니다.'}</p></div><button class="primary wide" onclick="closeGameModal();currentTab='my';render()">나의 기록 보기</button>`)}
 function resetGame(){gameModal('<h2 style="font-family:Georgia,serif">처음부터 다시 시작할까요?</h2><p>참가 정보와 모든 진행 기록이 이 기기에서 삭제됩니다.</p><button class="primary wide" onclick="localStorage.removeItem(\'ourSeasonState\');location.reload()">기록 삭제하고 다시 시작</button><button class="secondary wide" style="margin-top:8px" onclick="closeGameModal()">취소</button>')}
-function advanceDay(){ensureGameState();if(state.day>=10){showFinal();return}let pending=getDailyQuests().filter(q=>!questDone(q.id));if(pending.length){toast(`오늘의 퀘스트 ${pending.length}개를 먼저 완료해 주세요.`);return}const previousDay=state.day;state.day++;state.questActions={day:state.day,completed:[]};state.interestDelivered=false;if(previousDay===1&&state.day===2&&(state.firstImpressions||[]).length&&!state.dayTwoMessageDelivered){const selectedId=state.firstImpressions[0];(dayTwoMessages[selectedId]||[]).forEach(text=>state.messages[selectedId].push({from:'them',text:text.replaceAll('{{userName}}',state.name||''),day:2}));state.dayTwoMessageDelivered=true;state.dayTwoMessageTarget=selectedId;}save();render();toast(`DAY ${String(state.day).padStart(2,'0')}가 시작되었습니다.`);if(state.day===2&&state.dayTwoMessageTarget){const target=state.dayTwoMessageTarget;notify(`당신의 첫인상 선택이 상대방에게도 전해졌습니다. 먼저 도착한 메시지를 확인하고 답장을 보내 보세요.`,target);}if(state.day===3){deliverSecretLettersForAll()}}
+function advanceDay(){
+ ensureGameState();if(state.day>=10){showFinal();return}
+ let pending=getDailyQuests().filter(q=>!questDone(q.id));
+ if(pending.length){toast(`오늘의 일정 ${pending.length}개를 먼저 완료해 주세요.`);return}
+ const previousDay=state.day;const completedQuestIds=getDailyQuests().filter(q=>questDone(q.id)).map(q=>q.id);state.dayHistory=state.dayHistory||[];state.dayHistory.push({day:previousDay,completed:completedQuestIds});state.day++;state.questActions={day:state.day,completed:[]};state.interestDelivered=false;
+ if(previousDay===1&&state.day===2&&(state.firstImpressions||[]).length&&!state.dayTwoMessageDelivered){
+  const selectedId=state.firstImpressions[0];(dayTwoMessages[selectedId]||[]).forEach(text=>state.messages[selectedId].push({from:'them',text:text.replaceAll('{{userName}}',state.name||''),day:2}));
+  state.dayTwoMessageDelivered=true;state.dayTwoMessageTarget=selectedId;
+ }
+ if(state.day>=3){
+  const top=people.slice().sort((a,b)=>(state.scores[b.id]||0)-(state.scores[a.id]||0))[0];
+  const introByDay={
+   3:'첫 데이트 이후, 하우스의 분위기가 조금 달라졌습니다.',
+   4:'오늘은 새로운 조합으로 시간을 보내게 됩니다.',
+   5:'프로그램의 절반을 지나고 있습니다. 마음을 돌아볼 시간입니다.',
+   6:'참가자들의 관심이 서로 다른 방향으로 향하기 시작합니다.',
+   7:'오늘은 조금 더 깊은 이야기를 나눌 기회가 있습니다.',
+   8:'마지막 데이트 신청이 시작됩니다.',
+   9:'최종 선택을 하루 앞둔 마지막 밤입니다.',
+   10:'OUR SEASON의 마지막 날입니다. 최종 선택을 준비하세요.'
+  };
+  if(top&&state.day>=4&&state.day<=9){
+   const msg=introByDay[state.day]||'새로운 하루가 시작되었습니다.';
+   if(state.day===4||state.day===6||state.day===8)state.notifications=state.notifications||[];
+   state.notifications.unshift({day:state.day,text:msg,read:false,target:null});
+  }
+ }
+ save();render();toast(`DAY ${String(state.day).padStart(2,'0')}가 시작되었습니다.`);
+ if(state.day===2&&state.dayTwoMessageTarget){const target=state.dayTwoMessageTarget;notify('첫인상 선택이 상대방에게도 전해졌습니다. 먼저 도착한 메시지를 확인해 보세요.',target);}
+ if(state.day===3)deliverSecretLettersForAll();
+}
 function mapView(){return `<div class="screen"><button class="back" onclick="subpage=null;render()">← MY로 돌아가기</button>${header('THE CONNECTIONS','RELATIONSHIP','DAY '+String(state.day).padStart(2,'0'))}<p class="subcopy">참가자별 관계 기록과 최근 변화를 확인할 수 있습니다.</p><div class="info-list">${people.map(p=>`<div class="info-row"><b>${p.name}</b><span style="float:right">RELATIONSHIP</span><p style="margin:7px 0 0;color:#8e8174">${(state.events||[]).filter(e=>e.text.includes(p.name)).slice(-2).map(e=>e.text).join(' · ')||'아직 기록된 변화가 없습니다.'}</p></div>`).join('')}</div></div>`}
 function lettersView(){ensureGameState();return `<div class="screen"><button class="back" onclick="subpage=null;render()">← MY로 돌아가기</button>${header('WORDS FROM SOMEONE','LETTER','ANONYMOUS')}<p class="subcopy">누군가 당신에게 남긴 마음을 확인해 보세요.</p>${state.letters.length?state.letters.map((l,i)=>`<button class="menu-row" style="width:100%" onclick="openLetter(${i})"><span>DAY ${String(l.day).padStart(2,'0')} · 익명의 편지</span><span>${l.opened?'읽음':'새 편지'} →</span></button>`).join(''):'<div class="letter"><h3>아직 도착한 편지가 없습니다.</h3><p>DAY 03에 익명의 편지가 전달됩니다.</p></div>'}</div>`}
 function render(){ensureGameState();nav();let html;if(subpage==='map')html=mapView();else if(subpage==='letters')html=lettersView();else if(selectedPerson)html=profile();else if(currentTab==='home')html=home();else if(currentTab==='cast')html=cast();else if(currentTab==='chat')html=chat();else if(currentTab==='date')html=date();else if(currentTab==='my')html=my();$('#screen').innerHTML=html}
