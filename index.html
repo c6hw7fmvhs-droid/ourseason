@@ -228,6 +228,44 @@ h2{font-family:'SUIT','Pretendard','Noto Sans KR',sans-serif;font-weight:750;let
 
 
 .date-place-grid{display:grid;gap:10px}
+
+/* Align the day progression panel as one consistent row */
+.day-control{
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:14px;
+ box-sizing:border-box;
+ min-height:68px;
+ margin-top:18px;
+ padding:12px 14px;
+ border:1px solid #DCE6ED;
+ border-radius:14px;
+ background:#F2F6F9;
+}
+.day-control>div{
+ display:flex;
+ flex-direction:column;
+ justify-content:center;
+ gap:5px;
+ min-width:0;
+}
+.day-control>div br{display:none}
+.day-control>div .smallcaps{line-height:1.2}
+.day-control b{display:block;line-height:1.25}
+.day-control .primary{
+ flex:0 0 auto;
+ min-width:0;
+ margin:0;
+ padding:12px 16px;
+ line-height:1.2;
+ white-space:nowrap;
+ border-radius:11px;
+}
+@media(max-width:360px){
+ .day-control{gap:8px;padding:10px}
+ .day-control .primary{padding:11px 10px;font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -551,6 +589,46 @@ const dateThemes=[
  {id:'future',name:'앞으로의 이야기',desc:'앞으로 해보고 싶은 일과 바라는 관계를 이야기한다.',quick:'앞으로 해보고 싶은 일을 묻는다.'},
  {id:'love',name:'연애에 대한 생각',desc:'좋아하는 마음과 관계에 대한 생각을 나눈다.',quick:'연애에 대한 생각을 조심스럽게 묻는다.'}
 ];
+
+function dateThemesForLocation(locationId){
+ const topics={
+  cafe:[
+   {id:'daily',name:'요즘의 작은 변화',desc:'최근 일상에서 달라진 점과 사소한 근황을 나눈다.'},
+   {id:'memory',name:'기억에 남은 대화',desc:'처음 만났을 때나 함께 웃었던 순간을 떠올린다.'},
+   {id:'future',name:'다음에 가고 싶은 곳',desc:'다음번에 함께 가보고 싶은 장소와 하고 싶은 일을 이야기한다.'},
+   {id:'love',name:'편안함의 기준',desc:'누군가와 함께 있을 때 편안하다고 느끼는 순간을 나눈다.'}
+  ],
+  walk:[
+   {id:'daily',name:'요즘 마음의 날씨',desc:'최근 기분과 머릿속을 차지하는 생각을 천천히 나눈다.'},
+   {id:'memory',name:'함께 걷고 싶은 기억',desc:'기억에 남는 산책이나 둘이 함께했던 순간을 떠올린다.'},
+   {id:'future',name:'언젠가 함께할 하루',desc:'시간이 생기면 함께 해보고 싶은 경험을 이야기한다.'},
+   {id:'love',name:'서로에게 필요한 거리',desc:'관계에서 혼자만의 시간과 함께하는 시간의 균형을 나눈다.'}
+  ],
+  dinner:[
+   {id:'daily',name:'좋아하는 것과 취향',desc:'좋아하는 음식과 요즘 빠져 있는 것들을 알아간다.'},
+   {id:'memory',name:'잊지 못할 한 끼',desc:'오래 기억에 남는 식사와 그때 함께한 사람을 이야기한다.'},
+   {id:'future',name:'함께 먹고 싶은 음식',desc:'다음에 함께 먹고 싶은 메뉴와 가보고 싶은 식당을 고른다.'},
+   {id:'love',name:'데이트에서 중요한 것',desc:'데이트할 때 중요하게 생각하는 분위기와 배려를 나눈다.'}
+  ],
+  gallery:[
+   {id:'daily',name:'요즘 눈길이 가는 것',desc:'최근 관심이 생긴 취미나 자꾸 눈에 들어오는 것들을 나눈다.'},
+   {id:'memory',name:'오래 남는 장면',desc:'오랫동안 기억에 남아 있는 풍경이나 순간을 서로에게 들려준다.'},
+   {id:'future',name:'함께 보고 싶은 풍경',desc:'앞으로 함께 가보고 싶은 전시와 장소를 이야기한다.'},
+   {id:'love',name:'서로 다른 시선',desc:'같은 것을 보고도 다르게 느끼는 점과 서로의 생각을 나눈다.'}
+  ]
+ };
+ return topics[locationId]||dateThemes;
+}
+function dateConversationChoices(locationId){
+ const choices={
+  cafe:[['상대가 말한 사소한 부분까지 기억해 두고 질문한다.',1,'attentive'],['나도 비슷하게 느꼈던 경험을 솔직하게 들려준다.',1,'share'],['잠시 여유를 두고 상대가 편하게 말을 이어가도록 한다.',0,'patient']],
+  walk:[['걸음을 맞추며 상대의 이야기를 끝까지 듣는다.',1,'listen'],['눈앞의 풍경을 보며 떠오른 생각을 나눈다.',1,'share'],['가벼운 질문으로 대화의 방향을 바꿔 본다.',0,'light']],
+  dinner:[['상대의 음식 취향과 이유를 더 물어본다.',1,'attentive'],['내가 좋아하는 음식과 그에 얽힌 기억을 이야기한다.',1,'share'],['메뉴를 함께 고르며 편안한 분위기를 이어간다.',0,'patient']],
+  gallery:[['작품을 보며 상대가 느낀 점을 먼저 들어본다.',1,'listen'],['작품에서 떠오른 개인적인 기억을 들려준다.',1,'share'],['정답을 정하지 않고 서로의 다른 해석을 즐긴다.',0,'consider']]
+ };
+ return choices[locationId]||choices.cafe;
+}
+
 function date(){
  const used=state.dateHistory.some(x=>x.day===state.day);
  const selected=people.find(p=>p.id===state.dateChoice);
@@ -586,11 +664,7 @@ function openDateScene(which){
   ['오늘 어떤 하루였는지 먼저 물어본다.',1,'attentive'],
   ['장소와 분위기에 관한 가벼운 이야기로 시작한다.',0,'light']
  ];
- if(which==='conversation')choices=[
-  ['말을 끊지 않고 끝까지 들어 준다.',1,'listen'],
-  ['나의 생각과 비슷한 경험도 솔직하게 나눈다.',1,'share'],
-  ['무거워지지 않도록 다른 화제로 전환한다.',0,'redirect']
- ];
+ if(which==='conversation')choices=dateConversationChoices(d.location);
  if(which==='closing')choices=[
   ['다음에 함께하고 싶은 일을 구체적으로 제안한다.',2,'future'],
   ['오늘 즐거웠다고 담백하게 전한다.',1,'warm'],
@@ -602,7 +676,7 @@ function chooseDateScene(which,index){
  const d=state.activeDate;if(!d)return;
  const all={
  opening:[['상대가 먼저 이야기할 때까지 편하게 기다린다.',0,'patient'],['오늘 어떤 하루였는지 먼저 물어본다.',1,'attentive'],['장소와 분위기에 관한 가벼운 이야기로 시작한다.',0,'light']],
- conversation:[['말을 끊지 않고 끝까지 들어 준다.',1,'listen'],['나의 생각과 비슷한 경험도 솔직하게 나눈다.',1,'share'],['무거워지지 않도록 다른 화제로 전환한다.',0,'redirect']],
+ conversation:dateConversationChoices(d.location),
  closing:[['다음에 함께하고 싶은 일을 구체적으로 제안한다.',2,'future'],['오늘 즐거웠다고 담백하게 전한다.',1,'warm'],['상대의 기분을 먼저 물어본다.',1,'consider']]
  };
  const c=all[which][index];d.actions.push({scene:which,index,kind:c[2],value:c[1]});
@@ -612,15 +686,16 @@ function chooseDateScene(which,index){
  else completeDate(d.id,d.theme,d.actions,true);
 }
 function openDateTheme(){
- const d=state.activeDate,p=person(d.id);
- gameModal(`<div class="smallcaps">CONVERSATION TOPIC</div><h2 style="font-size:25px;margin:10px 0">${p.name}와 어떤 이야기를 나눌까?</h2><p>대화 주제에 따라 데이트의 분위기와 후속 메시지가 달라집니다.</p><div style="display:grid;gap:9px;margin-top:16px">${dateThemes.map(t=>`<button class="choice" onclick="selectDateTheme('${t.id}')"><b>${t.name}</b><small style="display:block;margin-top:4px;opacity:.7">${t.desc}</small></button>`).join('')}</div>`);
+ const d=state.activeDate,p=person(d.id),loc=dateLocations.find(x=>x.id===d.location),topics=dateThemesForLocation(d.location);
+ gameModal(`<div class="smallcaps">CONVERSATION TOPIC · ${loc.name}</div><h2 style="font-size:25px;margin:10px 0">${p.name}와 어떤 이야기를 나눌까?</h2><p>${loc.name}의 분위기에 어울리는 대화 주제를 골라보세요.</p><div style="display:grid;gap:9px;margin-top:16px">${topics.map(t=>`<button class="choice" onclick="selectDateTheme('${t.id}')"><b>${t.name}</b><small style="display:block;margin-top:4px;opacity:.7">${t.desc}</small></button>`).join('')}</div>`);
 }
 function selectDateTheme(id){
  const d=state.activeDate;if(!d)return;d.theme=id;save();closeGameModal();openDateScene('conversation');
 }
 function openQuickDate(){
  const d=state.activeDate,p=person(d.id),loc=dateLocations.find(x=>x.id===d.location);
- gameModal(`<div class="smallcaps">DAY ${String(d.day).padStart(2,'0')} · DATE</div><h2 style="font-size:25px;margin:10px 0">${p.name}와의 데이트</h2><p>${loc.name}에서 ${p.name}와 시간을 보낸다. 오늘은 어떤 이야기를 나눌까?</p><div style="display:grid;gap:9px;margin-top:18px">${dateThemes.map((t,i)=>`<button class="choice" onclick="completeDate('${p.id}','${t.id}',[{scene:'quick',kind:'${t.id}',value:${[2,2,1,3][i]}}],false)"><b>${t.name}</b><small style="display:block;margin-top:4px;opacity:.7">${t.desc}</small></button>`).join('')}</div>`);
+ const topics=dateThemesForLocation(d.location);
+ gameModal(`<div class="smallcaps">DAY ${String(d.day).padStart(2,'0')} · DATE</div><h2 style="font-size:25px;margin:10px 0">${p.name}와의 데이트</h2><p>${loc.name}에서 ${p.name}와 시간을 보낸다. 장소의 분위기에 어울리는 이야기를 골라보자.</p><div style="display:grid;gap:9px;margin-top:18px">${topics.map((t,i)=>`<button class="choice" onclick="completeDate('${p.id}','${t.id}',[{scene:'quick',kind:'${t.id}',value:${[2,2,1,3][i]}}],false)"><b>${t.name}</b><small style="display:block;margin-top:4px;opacity:.7">${t.desc}</small></button>`).join('')}</div>`);
 }
 function completeDate(id,theme,actions,deep){
  const p=person(id),d=state.activeDate,loc=dateLocations.find(x=>x.id===d.location),themeObj=dateThemes.find(x=>x.id===theme)||dateThemes[0];
@@ -673,7 +748,6 @@ function logEvent(message){ensureGameState();state.events.push({day:state.day,te
 function chooseFirstImpression(id){ensureGameState();if(state.firstImpressions.includes(id)){toast('이미 첫인상을 선택했습니다.');return}if(state.firstImpressions.length>=1){toast('첫인상은 한 명만 선택할 수 있습니다.');return}state.firstImpressions.push(id);changeRel(id,8,`${person(id).name}을(를) 첫인상으로 선택했다.`);closeGameModal();toast(`${person(id).name}에게 첫인상을 전했습니다.`);render()}
 function showFirstImpression(){ensureGameState();if(state.day!==1){toast('첫인상 선택은 DAY 01에만 할 수 있습니다.');return}gameModal(`<div class="smallcaps">DAY 01 · FIRST IMPRESSION</div><h2 style="font-family:Georgia,serif;font-size:30px;margin:10px 0">첫인상 선택</h2><p>오늘 가장 더 알아가고 싶은 참가자 한 명을 선택하세요. 선택은 관계 기록에 반영됩니다.</p>${people.map(p=>`<button class="choice" style="display:block;width:100%;margin:8px 0;padding:13px;border:1px solid #d8cfc1;border-radius:12px;background:#fffdf8;text-align:left" onclick="chooseFirstImpression('${p.id}')">${p.name} · ${p.age}세</button>`).join('')}<button class="secondary" style="width:100%;margin-top:8px" onclick="closeGameModal()">나중에 선택하기</button>`)}
 function notify(message,targetPersonId=null){ensureGameState();state.notifications=state.notifications||[];state.notifications.unshift({day:state.day,text:message,read:false,target:targetPersonId||null});save();toast(message,targetPersonId?()=>openChat(targetPersonId):null)}
-function startDate(){ensureGameState();if(!state.dateChoice){toast('데이트 상대를 먼저 선택해 주세요.');return}let p=person(state.dateChoice);if(state.day<2){toast('데이트는 DAY 02부터 진행할 수 있습니다.');return}if(state.dateHistory.some(x=>x.day===state.day)){toast('오늘의 데이트는 이미 진행했습니다.');return}gameModal(`<div class="smallcaps">DAY ${String(state.day).padStart(2,'0')} · DATE</div><h2 style="font-family:Georgia,serif;font-size:30px">${p.name}와의 데이트</h2><p>한강공원, 오후 4시. 둘만의 시간을 보내며 어떤 이야기를 나눌까요?</p><div style="display:grid;gap:9px;margin-top:18px"><button class="choice" onclick="finishDate('${p.id}',0)">요즘 가장 신경 쓰이는 일에 관해 묻는다.</button><button class="choice" onclick="finishDate('${p.id}',1)">함께 지냈던 예전 기억을 꺼낸다.</button><button class="choice" onclick="finishDate('${p.id}',2)">조금 더 편안하고 가벼운 이야기를 나눈다.</button></div>`)}
 const dateReplyChoicesByPerson={
  jiwoo:['나도 오늘 너랑 이야기해서 좋았어. 다음에도 같이 있자.','다음에는 네 이야기도 더 들려줘.','나도 오늘 시간이 짧게 느껴졌어.'],
  yuryeon:['네가 그렇게 말해 주니까 마음이 놓이네.','나도 다음에는 더 솔직하게 이야기해 볼게.','오늘처럼 편하게 만날 수 있으면 좋겠어.'],
