@@ -901,6 +901,7 @@ function resumeDay3(){
  ensureDay3Data();if(state.day3.completed)return;
  if(!state.day3.events.some(e=>e.eventId==='EVENT_01')&&!state.day3.awaitingDate){openDay3Event01();return}
  if(state.day3.awaitingDate){currentTab='date';render();toast('데이트 상대와 장소를 선택해 주세요.');return}
+ if(state.day3.awaitingInterlude){showDay3Interlude(state.day3.interludeStage||'between');return}
  if(state.day3.activeEvent==='EVENT_06'&&state.day3.event06Resolved){showDay3Event06Closing();return}
  if(state.day3.activeEvent){const reopen={EVENT_02:openDay3Event02,EVENT_03:openDay3Event03,EVENT_04:openDay3Event04,EVENT_05:openDay3Event05,EVENT_06:openDay3Event06};if(reopen[state.day3.activeEvent]){reopen[state.day3.activeEvent]();return}}
  if(state.day3.queue.length>state.day3.cursor){runNextDay3Event();return}
@@ -974,8 +975,10 @@ function selectDay3SideEvents(){
  if(unique.includes('EVENT_06')&&Math.random()<0.65)picked.push('EVENT_06');
  const rest=unique.filter(x=>x!=='EVENT_06').sort(()=>Math.random()-.5);
  picked=picked.concat(rest.slice(0,Math.max(0,slots-picked.length)));
- if(!picked.length){state.day3.skipped.push(...['EVENT_02','EVENT_03','EVENT_04','EVENT_05','EVENT_06'].filter(x=>!eventCandidate(x)));markDay3Complete();return}
- state.day3.queue=picked;state.day3.cursor=0;state.day3.selectedEvents=[...picked];save();runNextDay3Event();
+ if(!picked.length){state.day3.skipped.push(...['EVENT_02','EVENT_03','EVENT_04','EVENT_05','EVENT_06'].filter(x=>!eventCandidate(x)));state.day3.queue=[];state.day3.cursor=0;state.day3.selectedEvents=[];showDay3Interlude('final');return}
+ // EVENT 06은 늦은 저녁 감정 이벤트이므로 항상 선택된 자유 이벤트의 마지막에 배치한다.
+ picked=picked.filter(x=>x!=='EVENT_06').concat(picked.includes('EVENT_06')?['EVENT_06']:[]);
+ state.day3.queue=picked;state.day3.cursor=0;state.day3.selectedEvents=[...picked];save();showDay3Interlude('afterDate');
 }
 function findDay3EmotionalCause(id){
  const matches=(state.day3.events||[]).filter(e=>(e.participants||[]).includes(id));
@@ -984,12 +987,20 @@ function findDay3EmotionalCause(id){
  const strong=!!last.strongEmotionalTrigger;
  return {eventId:last.eventId,summary:last.summary,strong};
 }
-function runNextDay3Event(){
- ensureDay3Data();if(state.day3.cursor>=state.day3.queue.length){markDay3Complete();return}
- const id=state.day3.queue[state.day3.cursor++];state.day3.activeEvent=id;save();
- if(id==='EVENT_02')openDay3Event02();else if(id==='EVENT_03')openDay3Event03();else if(id==='EVENT_04')openDay3Event04();else if(id==='EVENT_05')openDay3Event05();else if(id==='EVENT_06')openDay3Event06();else runNextDay3Event();
+function showDay3Interlude(stage='between'){
+ ensureDay3Data();state.day3.awaitingInterlude=true;state.day3.interludeStage=stage;save();
+ const final=stage==='final';
+ const heading=final?'하루를 마무리할 시간':'잠시 자유 시간';
+ const copy=stage==='afterDate'?'데이트를 마치고 숙소로 돌아왔다. 다른 참가자들은 각자의 시간을 보내고 있다. 잠시 쉬거나 공용 공간에서 시간을 보낸 뒤, 저녁의 흐름이 이어진다.':stage==='final'?'오늘 있었던 일들을 천천히 정리한다. 더 이어질 이벤트는 없다. 이제 DAY 3을 마무리한다.':'방금 있었던 일이 지나가고 시간이 조금 흘렀다. 숙소 안은 잠시 평온해졌다. 다음 상황은 자연스럽게 찾아온다.';
+ const button=final?'DAY 3 마무리하기 →':'시간을 조금 보낸다 →';
+ gameModal(`<div class="smallcaps">DAY 03 · ${final?'END OF DAY':'FREE TIME'}</div><h2 style="font-size:25px">${heading}</h2><p style="line-height:1.9;margin:16px 0">${copy}</p><div class="notice">${final?'오늘의 주요 일정이 모두 끝났다.':'서두를 필요는 없다. 잠시 여유를 가진 뒤 다음 순간으로 넘어간다.'}</div><button class="primary wide" style="margin-top:16px" onclick="continueDay3Flow()">${button}</button>`);
 }
-function finishDay3SideEvent(){state.day3.activeEvent=null;save();closeGameModal();runNextDay3Event()}
+function continueDay3Flow(){
+ ensureDay3Data();state.day3.awaitingInterlude=false;const stage=state.day3.interludeStage;state.day3.interludeStage=null;save();closeGameModal();
+ if(stage==='final'||state.day3.cursor>=state.day3.queue.length){markDay3Complete();return}
+ runNextDay3Event();
+}
+function finishDay3SideEvent(){const finished=state.day3.activeEvent;state.day3.activeEvent=null;save();closeGameModal();showDay3Interlude(state.day3.cursor>=state.day3.queue.length?'final':'between')}
 function openDay3Event02(){
  const pool=people.filter(p=>p.id!==state.day3.event01Participant||Math.random()>.45);const a=pool[Math.floor(Math.random()*pool.length)]||people[0];const b=pool.filter(p=>p.id!==a.id)[0];const ids=b?[a.id,b.id]:[a.id];state.day3.currentParticipants=ids;
  const scene=`저녁 준비가 한창인 주방. ${a.name}${b?'와 '+b.name:''}이(가) 재료를 꺼내 놓고 메뉴를 정하고 있다. 당신이 다가오자 자연스럽게 자리를 내어 준다.`;
@@ -1019,7 +1030,7 @@ function openDay3Event05(){
 function resolveDay3Event05(choice){const ids=state.day3.currentParticipants;ids.forEach(id=>{if(choice===1)changeMetric3(id,'intimacy',1,'대화 주제에 자연스럽게 참여함');if(choice===3)changeMetric3(id,'intimacy',2,'참가자들의 대화에 적극적으로 합류함')});if(choice===3)addPairMetric3(ids[0],ids[1],'intimacy',1);recordDay3Event('EVENT_05',ids,'두 참가자의 대화에 합류했다.',{playerChoice:choice});state.day3.lastParticipant=ids[0];finishDay3SideEvent()}
 function openDay3Event06(){
  const triggers=people.map(p=>({p,cause:findDay3EmotionalCause(p.id),r:rel3(p.id)})).filter(x=>x.cause&&(x.r.jealousy>=40||x.r.disappointment>=40||x.cause.strong));
- if(!triggers.length){state.day3.skipped.push('EVENT_06');runNextDay3Event();return}
+ if(!triggers.length){state.day3.skipped.push('EVENT_06');state.day3.activeEvent=null;save();showDay3Interlude(state.day3.cursor>=state.day3.queue.length?'final':'between');return}
  triggers.sort((a,b)=>(b.r.jealousy+b.r.disappointment)-(a.r.jealousy+a.r.disappointment));const {p,cause,r}=triggers[0];state.day3.currentParticipants=[p.id];state.day3.currentTrigger=cause;
  const emotion=r.jealousy>=40&&r.disappointment>=40?'mixed':r.jealousy>=40?'jealousy':'disappointment';const lines=day3ParticipantLines[p.id];const main=lines[emotion]||lines.mixed;
  gameModal(`<div class="smallcaps">DAY 03 · EVENT 06</div><h2 style="font-size:25px">예상하지 못한 감정</h2><p class="muted">${p.name} · 늦은 저녁</p><p style="line-height:1.9">하루 동안 여러 사람과 시간을 보낸 뒤 공용 공간을 지나간다. ${p.name}이(가) 혼자 앉아 있다. 평소와 크게 다르지 않은 모습이지만, 당신이 다가오자 잠시 시선을 피한다.</p><div class="notice">${p.name}: "${main}"</div><p style="line-height:1.8">플레이어: "왜 그런 생각이 들었어?"<br>${p.name}: "오늘 있었던 일 때문인 것 같아. 그냥 넘기려고 했는데 생각보다 마음에 남더라."</p><div style="display:grid;gap:9px;margin-top:14px"><button class="choice" onclick="resolveDay3Event06(1)">나도 네가 신경 쓰였어.</button><button class="choice" onclick="resolveDay3Event06(2)">왜 그렇게 생각했는지 이야기해 줘.</button><button class="choice" onclick="resolveDay3Event06(3)">미안해. 내가 조금 더 신경 썼어야 했네.</button></div>`);
